@@ -191,12 +191,17 @@ export async function saveTotpSecret(secret: string): Promise<void> {
   );
 }
 
+/**
+ * Only wrong 2FA codes count: a Google login with another account must not be
+ * able to fill the global bucket and lock the real admin out.
+ */
 export async function isRateLimited(request: Request): Promise<boolean> {
   const rows = await query<{ by_ip: string; global: string }>(
     `select
        count(*) filter (where ip = $1 and at > now() - make_interval(mins => $2)) as by_ip,
        count(*) filter (where at > now() - interval '1 hour') as global
-     from admin_auth_failures`,
+     from admin_auth_failures
+     where kind in ('totp', 'stepup')`,
     [clientIp(request), FAILURE_WINDOW_MINUTES],
   );
   return (

@@ -37,10 +37,14 @@ export async function runBackup(): Promise<string> {
   return `${stdout}${stderr}`.trim();
 }
 
-/** pg_restore --clean into `db` from a dump in the backup folder, as the postgres user. */
+/**
+ * pg_restore --clean into `db` from a dump in the backup folder, as the postgres user.
+ * Keeps the dump's owners: with --no-owner every table would belong to postgres,
+ * and an app role behind RLS would then see empty tables instead of an error.
+ */
 export function restoreBackup(db: string, path: string): Promise<{ code: number; output: string }> {
   return new Promise((resolve) => {
-    const child = spawn("runuser", ["-u", "postgres", "--", "pg_restore", "--clean", "--if-exists", "--no-owner", "-d", db], {
+    const child = spawn("runuser", ["-u", "postgres", "--", "pg_restore", "--clean", "--if-exists", "-d", db], {
       cwd: "/tmp",
       stdio: ["pipe", "pipe", "pipe"],
     });
