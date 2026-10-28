@@ -30,6 +30,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/database" className={link}>Database & SQL</Link>
           <Link href="/backups" className={link}>Sao lưu</Link>
           <Link href="/terminal" className={link}>Terminal</Link>
+          <Link href="/vault" className={link}>Vault 2FA</Link>
           <Link href="/audit" className={link}>Nhật ký thao tác</Link>
         </nav>
         <div className="mt-6 space-y-1 px-3">
