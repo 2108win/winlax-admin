@@ -104,17 +104,17 @@ export function WebTerminal() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">Terminal</h1>
-        <span className="text-xs text-white/40">{status}</span>
+        <span className="text-xs text-base-content/40">{status}</span>
       </div>
       {!started ? (
-        <div className="space-y-3 text-sm text-white/60">
+        <div className="space-y-3 text-sm text-base-content/60">
           <p>Shell bash với quyền root trên VPS, giống SSH. Cần nhập lại mã 2FA. Đóng trang là đóng shell; để yên 30 phút cũng tự đóng.</p>
-          <button onClick={() => setStarted(true)} className="rounded-lg bg-white px-3 py-1.5 text-sm text-black">
+          <button onClick={() => setStarted(true)} className="btn btn-primary btn-sm">
             Mở terminal
           </button>
         </div>
       ) : (
-        <div ref={container} className="h-[70vh] overflow-hidden rounded-xl border border-white/10 bg-[#0b0d12] p-2" />
+        <div ref={container} className="h-[70vh] overflow-hidden rounded-xl border border-base-300 bg-base-300 p-2" />
       )}
     </div>
   );

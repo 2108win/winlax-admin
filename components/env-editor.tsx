@@ -36,19 +36,19 @@ export function EnvEditor({ app }: { app: string }) {
   }
 
   return (
-    <section className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <section className="rounded-xl border border-base-300 bg-base-200 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-xs uppercase tracking-wide text-white/40">Biến môi trường</h2>
+        <h2 className="text-xs uppercase tracking-wide text-base-content/40">Biến môi trường</h2>
         {content === null ? (
-          <button onClick={open} className="ml-auto rounded-lg border border-white/15 px-3 py-1 text-sm hover:bg-white/10">
+          <button onClick={open} className="ml-auto btn btn-outline btn-sm">
             Mở để xem / sửa
           </button>
         ) : (
           <div className="ml-auto flex gap-2">
-            <button onClick={() => setContent(null)} className="rounded-lg px-3 py-1 text-sm text-white/50 hover:text-white">
+            <button onClick={() => setContent(null)} className="btn btn-ghost btn-sm">
               Đóng
             </button>
-            <button disabled={busy} onClick={save} className="rounded-lg bg-white px-3 py-1 text-sm text-black disabled:opacity-40">
+            <button disabled={busy} onClick={save} className="btn btn-primary btn-sm">
               {busy ? "Đang lưu…" : "Lưu"}
             </button>
           </div>
@@ -59,10 +59,10 @@ export function EnvEditor({ app }: { app: string }) {
           value={content}
           onChange={(event) => setContent(event.target.value)}
           spellCheck={false}
-          className="log-view mt-3 h-80 w-full rounded-lg border border-white/10 bg-black/50 p-3 outline-none focus:border-white/30"
+          className="log-view mt-3 h-80 w-full rounded-lg border border-base-300 bg-base-300 p-3 outline-none focus:border-primary"
         />
       )}
-      {message && <p className="mt-2 text-sm text-white/70">{message}</p>}
+      {message && <p className="mt-2 text-sm text-base-content/70">{message}</p>}
     </section>
   );
 }

@@ -8,9 +8,9 @@ function Notice({ title, children }: { title: string; children: React.ReactNode 
   return (
     <div className="space-y-3">
       <h1 className="text-xl font-semibold">Vault 2FA</h1>
-      <div className="max-w-xl rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-sm">
-        <p className="font-medium text-red-200">{title}</p>
-        <div className="mt-2 text-white/60">{children}</div>
+      <div className="max-w-xl rounded-xl border border-error/30 bg-error/10 p-4 text-sm">
+        <p className="font-medium text-error">{title}</p>
+        <div className="mt-2 text-base-content/60">{children}</div>
       </div>
     </div>
   );

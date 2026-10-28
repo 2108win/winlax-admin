@@ -6,7 +6,7 @@ export function LogoutButton() {
     window.location.assign("/login");
   }
   return (
-    <button onClick={logout} className="text-left text-sm text-white/50 hover:text-white">
+    <button onClick={logout} className="btn btn-ghost btn-sm w-full justify-start">
       Đăng xuất
     </button>
   );

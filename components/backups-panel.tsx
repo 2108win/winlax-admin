@@ -68,28 +68,28 @@ export function BackupsPanel() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">Sao lưu PostgreSQL</h1>
-        <button disabled={busy} onClick={backupNow} className="ml-auto rounded-lg bg-white px-3 py-1.5 text-sm text-black disabled:opacity-40">
+        <button disabled={busy} onClick={backupNow} className="ml-auto btn btn-primary btn-sm">
           Sao lưu ngay
         </button>
       </div>
-      <p className="text-sm text-white/50">
+      <p className="text-sm text-base-content/50">
         Tự động lúc 2:30 sáng mỗi ngày, giữ 14 ngày, ở /var/backups/postgres trên VPS. Nên tải bản quan trọng về máy.
       </p>
-      {message && <pre className="log-view rounded-lg border border-white/10 bg-black/40 p-3">{message}</pre>}
-      {!dbs && <p className="text-sm text-white/50">Đang tải…</p>}
+      {message && <pre className="log-view rounded-lg border border-base-300 bg-base-300 p-3">{message}</pre>}
+      {!dbs && <p className="text-sm text-base-content/50">Đang tải…</p>}
       {dbs?.map((db) => (
-        <section key={db.db} className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+        <section key={db.db} className="rounded-xl border border-base-300 bg-base-200 p-4">
           <h2 className="font-medium">{db.db}</h2>
-          <ul className="mt-2 divide-y divide-white/5 text-sm">
+          <ul className="mt-2 divide-y divide-base-300 text-sm">
             {db.files.map((file) => (
               <li key={file.name} className="flex flex-wrap items-center gap-x-4 gap-y-1 py-1.5">
                 <span className="font-mono text-xs">{file.name}</span>
-                <span className="text-white/40">{bytes(file.size)}</span>
-                <span className="text-xs text-white/40">{dateTime(file.at)}</span>
-                <button onClick={() => download(db.db, file.name)} className="ml-auto text-xs text-sky-300 hover:underline">
+                <span className="text-base-content/40">{bytes(file.size)}</span>
+                <span className="text-xs text-base-content/40">{dateTime(file.at)}</span>
+                <button onClick={() => download(db.db, file.name)} className="ml-auto text-xs link link-info no-underline hover:underline">
                   Tải về
                 </button>
-                <button disabled={busy} onClick={() => restore(db.db, file.name)} className="text-xs text-red-300 hover:underline">
+                <button disabled={busy} onClick={() => restore(db.db, file.name)} className="text-xs text-error hover:underline">
                   Khôi phục
                 </button>
               </li>

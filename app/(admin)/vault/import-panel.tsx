@@ -514,7 +514,7 @@ function CandidateRow({
     note = <span className="text-destructive">{problem}</span>;
   } else if (existing) {
     note = (
-      <span className="text-amber">
+      <span className="text-warning">
         Đã có trong vault, chỉ tick nếu muốn lưu thêm bản nữa.
       </span>
     );
@@ -1263,12 +1263,12 @@ export function AddAccountDialog({
       >
         {open ? (
           <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+            <div className="flex items-start justify-between gap-4 border-b border-base-300 px-5 py-4">
               <div>
                 <h2 className="text-base font-semibold" id="vault-add-title">
                   Thêm tài khoản
                 </h2>
-                <p className="mt-0.5 text-sm text-white/50">
+                <p className="mt-0.5 text-sm text-base-content/50">
                   Nhập tay, hoặc quét QR từ ảnh, camera hay danh sách otpauth://.
                 </p>
               </div>

@@ -45,12 +45,12 @@ export function StepUpProvider({ children }: { children: React.ReactNode }) {
     <StepUpContext.Provider value={fetchWithStepUp}>
       {children}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#11141b] p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-base-300 bg-base-100 shadow-xl p-6">
             <h2 className="font-semibold">Xác nhận lại bằng mã 2FA</h2>
-            <p className="mt-1 text-sm text-white/60">Thao tác này cần mã mới (có hiệu lực 10 phút).</p>
+            <p className="mt-1 text-sm text-base-content/60">Thao tác này cần mã mới (có hiệu lực 10 phút).</p>
             <TotpForm endpoint="/api/auth/stepup" onDone={() => finish(true)} />
-            <button onClick={() => finish(false)} className="mt-3 w-full text-sm text-white/50 hover:text-white">
+            <button onClick={() => finish(false)} className="mt-3 w-full text-sm text-base-content/50 hover:text-base-content">
               Huỷ
             </button>
           </div>

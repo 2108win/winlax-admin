@@ -18,15 +18,15 @@ export default async function LoginPage({
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.03] p-8">
+      <div className="w-full max-w-sm rounded-2xl border border-base-300 bg-base-200 p-8">
         <h1 className="text-lg font-semibold">Quản trị VPS winlax</h1>
-        <p className="mt-1 text-sm text-white/60">Đăng nhập Google, sau đó nhập mã 2FA.</p>
+        <p className="mt-1 text-sm text-base-content/60">Đăng nhập Google, sau đó nhập mã 2FA.</p>
         {error && ERRORS[error] && (
-          <p className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{ERRORS[error]}</p>
+          <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{ERRORS[error]}</p>
         )}
         <a
           href="/api/auth/google/start"
-          className="mt-6 flex w-full items-center justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black hover:bg-white/90"
+          className="mt-6 flex w-full items-center justify-center btn btn-primary"
         >
           Đăng nhập bằng Google
         </a>

@@ -21,7 +21,7 @@ function quoteIdent(name: string) {
 }
 
 function show(value: unknown) {
-  if (value === null || value === undefined) return <span className="text-white/30">NULL</span>;
+  if (value === null || value === undefined) return <span className="text-base-content/30">NULL</span>;
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 }
@@ -79,9 +79,9 @@ export function SqlConsole() {
     return (
       <div className="space-y-3">
         <h1 className="text-xl font-semibold">Database & SQL</h1>
-        <p className="text-sm text-white/50">Toàn quyền trên mọi database của VPS (role superuser). Cần nhập lại mã 2FA.</p>
-        <button onClick={() => load()} className="rounded-lg bg-white px-3 py-1.5 text-sm text-black">Mở</button>
-        {error && <p className="text-sm text-red-300">{error}</p>}
+        <p className="text-sm text-base-content/50">Toàn quyền trên mọi database của VPS (role superuser). Cần nhập lại mã 2FA.</p>
+        <button onClick={() => load()} className="btn btn-primary btn-sm">Mở</button>
+        {error && <p className="text-sm text-error">{error}</p>}
       </div>
     );
   }
@@ -97,7 +97,7 @@ export function SqlConsole() {
             setResult(null);
             if (event.target.value) load(event.target.value);
           }}
-          className="rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-sm"
+          className="select select-sm"
         >
           <option value="">Chọn database…</option>
           {databases.map((item) => (
@@ -109,17 +109,17 @@ export function SqlConsole() {
       </div>
       {db && (
         <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
-          <aside className="max-h-[70vh] overflow-auto rounded-xl border border-white/10 bg-white/[0.03] p-2 text-sm">
-            {tables.length === 0 && <p className="p-2 text-white/40">Không có bảng.</p>}
+          <aside className="max-h-[70vh] overflow-auto rounded-xl border border-base-300 bg-base-200 p-2 text-sm">
+            {tables.length === 0 && <p className="p-2 text-base-content/40">Không có bảng.</p>}
             {tables.map((table) => (
               <button
                 key={`${table.schema}.${table.name}`}
                 onClick={() => browse(table)}
-                className="block w-full truncate rounded px-2 py-1 text-left hover:bg-white/5"
+                className="block w-full truncate rounded px-2 py-1 text-left hover:bg-base-200"
                 title={`${table.schema}.${table.name}`}
               >
                 {table.schema === "public" ? "" : `${table.schema}.`}
-                {table.name} <span className="text-xs text-white/30">~{table.rows} · {bytes(Number(table.size))}</span>
+                {table.name} <span className="text-xs text-base-content/30">~{table.rows} · {bytes(Number(table.size))}</span>
               </button>
             ))}
           </aside>
@@ -132,28 +132,28 @@ export function SqlConsole() {
               }}
               spellCheck={false}
               placeholder="select now();   (Ctrl/⌘ + Enter để chạy)"
-              className="log-view h-40 w-full rounded-lg border border-white/10 bg-black/50 p-3 outline-none focus:border-white/30"
+              className="log-view textarea h-40 w-full"
             />
             <div className="flex items-center gap-3">
-              <button disabled={busy || !sql.trim()} onClick={() => execute()} className="rounded-lg bg-white px-3 py-1.5 text-sm text-black disabled:opacity-40">
+              <button disabled={busy || !sql.trim()} onClick={() => execute()} className="btn btn-primary btn-sm">
                 {busy ? "Đang chạy…" : "Chạy"}
               </button>
               {result && (
-                <p className="text-xs text-white/50">
+                <p className="text-xs text-base-content/50">
                   {result.command} · {result.rowCount ?? 0} dòng · {result.ms} ms
                   {result.statements > 1 && ` · ${result.statements} câu (hiện kết quả câu cuối)`}
                   {result.truncated && " · chỉ hiện 1000 dòng đầu"}
                 </p>
               )}
             </div>
-            {error && <pre className="log-view rounded-lg border border-red-400/30 bg-red-500/10 p-3 text-red-200">{error}</pre>}
+            {error && <pre className="log-view rounded-lg border border-error/30 bg-error/10 p-3 text-error">{error}</pre>}
             {result && result.fields.length > 0 && (
-              <div className="max-h-[60vh] overflow-auto rounded-xl border border-white/10">
+              <div className="max-h-[60vh] overflow-auto rounded-xl border border-base-300">
                 <table className="text-xs">
-                  <thead className="sticky top-0 bg-[#141821] text-left text-white/50">
+                  <thead className="sticky top-0 bg-base-200 text-left text-base-content/50">
                     <tr>{result.fields.map((field) => <th key={field} className="px-2 py-1.5 font-medium whitespace-nowrap">{field}</th>)}</tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 font-mono">
+                  <tbody className="divide-y divide-base-300 font-mono">
                     {result.rows.map((row, index) => (
                       <tr key={index}>
                         {result.fields.map((field) => (

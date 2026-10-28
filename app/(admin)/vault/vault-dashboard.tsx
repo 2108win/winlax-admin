@@ -643,7 +643,7 @@ export function VaultDashboard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Vault 2FA</h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-base-content/50">
             Mật khẩu, mã 2FA và ghi chú, mã hoá trong database winlax_v2. Mở bằng đăng nhập trang quản trị.
           </p>
         </div>
@@ -693,7 +693,7 @@ export function VaultDashboard({
                   </h2>
                   <p
                     aria-live="polite"
-                    className="mt-0.5 text-sm text-white/50"
+                    className="mt-0.5 text-sm text-base-content/50"
                   >
                     {copiedId
                       ? `Đã sao chép mã, tự xóa sau ${SECRET_CLIPBOARD_SECONDS} giây`

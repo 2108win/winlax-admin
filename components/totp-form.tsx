@@ -44,12 +44,12 @@ export function TotpForm({
         autoComplete="one-time-code"
         autoFocus
         placeholder="6 số"
-        className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2.5 text-center font-mono text-lg tracking-[0.4em] outline-none focus:border-white/40"
+        className="input input-lg w-full text-center font-mono tracking-[0.4em]"
       />
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
       <button
         disabled={busy || code.length !== 6}
-        className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black disabled:opacity-40"
+        className="w-full btn btn-primary"
       >
         {busy ? "Đang kiểm tra…" : "Xác nhận"}
       </button>

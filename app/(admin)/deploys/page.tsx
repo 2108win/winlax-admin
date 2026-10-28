@@ -10,12 +10,12 @@ export default async function DeploysPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Lịch sử deploy</h1>
-      <p className="text-sm text-white/50">
+      <p className="text-sm text-base-content/50">
         Mọi lần chạy lệnh deploy: từ trang này (admin), tự động khi push lên GitHub (webhook), hoặc qua SSH.
       </p>
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div className="overflow-x-auto rounded-xl border border-base-300">
         <table className="w-full text-sm">
-          <thead className="bg-white/[0.03] text-left text-xs text-white/40">
+          <thead className="bg-base-200 text-left text-xs text-base-content/40">
             <tr>
               <th className="px-3 py-2">Lúc</th>
               <th className="px-3 py-2">Web</th>
@@ -26,21 +26,21 @@ export default async function DeploysPage() {
               <th className="px-3 py-2">Log</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-base-300">
             {runs.map((run) => (
               <tr key={run.run}>
                 <td className="px-3 py-2 whitespace-nowrap" title={dateTime(run.startedAt)}>{ago(run.startedAt)}</td>
                 <td className="px-3 py-2">{run.app}</td>
                 <td className="px-3 py-2">{run.action}</td>
-                <td className={`px-3 py-2 ${run.status === "ok" ? "text-emerald-300" : run.status === "fail" ? "text-red-300" : "text-sky-300"}`}>
+                <td className={`px-3 py-2 ${run.status === "ok" ? "text-success" : run.status === "fail" ? "text-error" : "text-info"}`}>
                   {label[run.status] ?? run.status}
-                  {run.seconds !== undefined && <span className="text-white/40"> ({run.seconds}s)</span>}
+                  {run.seconds !== undefined && <span className="text-base-content/40"> ({run.seconds}s)</span>}
                 </td>
                 <td className="px-3 py-2 font-mono text-xs">{run.commit ?? "—"}</td>
-                <td className="px-3 py-2 text-xs text-white/50">{run.source}{run.by ? ` (${run.by})` : ""}</td>
+                <td className="px-3 py-2 text-xs text-base-content/50">{run.source}{run.by ? ` (${run.by})` : ""}</td>
                 <td className="px-3 py-2">
                   {run.log ? (
-                    <a className="text-xs text-sky-300 hover:underline" href={`/api/deploy-logs/${run.log.split("/").pop()}`} target="_blank" rel="noreferrer">
+                    <a className="text-xs link link-info no-underline hover:underline" href={`/api/deploy-logs/${run.log.split("/").pop()}`} target="_blank" rel="noreferrer">
                       xem
                     </a>
                   ) : (
@@ -50,7 +50,7 @@ export default async function DeploysPage() {
               </tr>
             ))}
             {runs.length === 0 && (
-              <tr><td className="px-3 py-6 text-center text-white/40" colSpan={7}>Chưa có lần deploy nào được ghi lại.</td></tr>
+              <tr><td className="px-3 py-6 text-center text-base-content/40" colSpan={7}>Chưa có lần deploy nào được ghi lại.</td></tr>
             )}
           </tbody>
         </table>

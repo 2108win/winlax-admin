@@ -1,9 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "daisyui" {
+  themes: dim --default, night, business, dracula, nord, corporate, light;
+}
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme=dim], [data-theme=night], [data-theme=business], [data-theme=dracula], [data-theme=dim] *, [data-theme=night] *, [data-theme=business] *, [data-theme=dracula] *));
 
-/* Tokens of winlax.id.vn (ember on ink), used by the vault and its shadcn/ui components. */
+/* The shadcn/ui components read these; they follow the active daisyUI theme (see :root). */
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -15,7 +18,6 @@
   --font-poppins: var(--font-body);
   --font-clashDisplay: var(--font-display);
   --color-background: var(--background);
-  --color-glass-background: var(--glass-background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -30,8 +32,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-glass-border: var(--glass-border);
+  --color-border: var(--color-base-300);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -39,123 +40,35 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-ember: var(--ember);
-  --color-amber: var(--amber);
-  --color-ink: var(--ink);
-  --color-paper: var(--paper);
 }
 
+/* The shadcn/ui contract, mapped onto the active daisyUI theme so every component (buttons,
+   inputs, tabs, dialogs in the vault) changes with the theme picker. Never define --border
+   here: daisyUI uses it for the border width. */
 :root {
-  color-scheme: dark;
-
-  /* Stage */
-  --ink: #070707;
-  --ink-raised: #0f0f0f;
-  --surface: #131313;
-  --surface-strong: #1b1b1b;
-  --paper: #f5f1ec;
-  --paper-soft: rgb(245 241 236 / 0.74);
-  --paper-quiet: rgb(245 241 236 / 0.56);
-  --line: rgb(245 241 236 / 0.1);
-  --line-strong: rgb(245 241 236 / 0.2);
-
-  /* Light source. Text that sits on --ember-ramp is ink, never white: white on these oranges
-     falls below 4.5:1, ink stays above it across the whole ramp. */
-  --amber: #f6a33a;
-  --ember: #ec6a2c;
-  --ember-deep: #d9472a;
-  --ember-dark: #6b220f;
-  --on-ember: #140904;
-  --ember-ramp: linear-gradient(100deg, #f2892f 0%, #ea6a2b 48%, #d9472a 100%);
-  --ember-text: #f39a4a;
-
-  /* Layout */
-  --gutter: clamp(1rem, 4.2vw, 4rem);
-  /* Grows past 90rem on very wide screens so 2K and 4K layouts are not an island in the middle. */
-  --container: max(90rem, 78vw);
-  --header-h: 4.5rem;
-  --section-space: clamp(5.5rem, 11vw, 10rem);
-  --radius: 0.75rem;
-  --radius-card: clamp(1rem, 1.5vw, 1.375rem);
-  --radius-panel: clamp(1.25rem, 2.4vw, 2rem);
-
-  /* Type scale: every step is clamped, so 320px phones and 2560px screens stay in proportion. */
-  --type-hero: clamp(2.75rem, 1.4rem + 6.6vw, 8.75rem);
-  --type-display: clamp(2.375rem, 1.3rem + 4.9vw, 6.5rem);
-  --type-section: clamp(2rem, 1.2rem + 3.6vw, 4.75rem);
-  --type-feature: clamp(1.5rem, 1.1rem + 1.4vw, 2.375rem);
-  --type-card: clamp(1.25rem, 1.05rem + 0.7vw, 1.75rem);
-  --type-lead: clamp(1.0625rem, 0.98rem + 0.4vw, 1.3125rem);
-  --type-body: 1rem;
-  --type-small: 0.875rem;
-  --type-label: 0.75rem;
-  --tracking-display: -0.035em;
-  --leading-display: 1.02;
-
-  /* Motion */
-  --duration-fast: 160ms;
-  --duration-interface: 220ms;
-  --duration-standard: 360ms;
-  --duration-cinematic: 800ms;
-  --ease-interface: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-editorial: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* shadcn/ui contract */
-  --background: var(--ink);
-  --foreground: var(--paper);
-  --card: var(--surface);
-  --card-foreground: var(--paper);
-  --popover: var(--surface-strong);
-  --popover-foreground: var(--paper);
-  --primary: var(--paper);
-  --primary-foreground: var(--ink);
-  --secondary: rgb(245 241 236 / 0.07);
-  --secondary-foreground: var(--paper);
-  --muted: rgb(245 241 236 / 0.06);
-  --muted-foreground: var(--paper-quiet);
-  --accent: rgb(236 106 44 / 0.14);
-  --accent-foreground: var(--paper);
-  --destructive: #ff6b5a;
-  --border: var(--line);
-  --input: var(--line-strong);
-  --ring: var(--ember);
-  --chart-1: var(--ember);
-  --chart-2: var(--amber);
-  --chart-3: var(--paper);
-  --chart-4: var(--paper-quiet);
-  --chart-5: var(--ember-deep);
-  --glass-background: rgb(19 19 19 / 0.72);
-  --glass-border: var(--line);
-  --focus-inner: var(--ember);
-  --focus-outer: var(--paper);
-
-  /* Names older components still read. */
-  --brand-orange: var(--ember);
-  --brand-dark: var(--ink);
-  --brand-white: var(--paper);
-  --editorial-ink: var(--ink);
-  --editorial-paper: var(--paper);
-  --editorial-heat: var(--ember);
-  --editorial-accent-ink: var(--ember-text);
-  --editorial-copy: var(--paper-soft);
-  --editorial-meta: var(--paper-quiet);
-  --editorial-copy-on-ink: var(--paper-soft);
-  --editorial-meta-on-ink: var(--paper-quiet);
-  --editorial-copy-on-paper: var(--paper-soft);
-  --editorial-meta-on-paper: var(--paper-quiet);
-  --brand-foreground: var(--paper);
-  --brand-muted-foreground: var(--paper-quiet);
-  --brand-warm-border: rgb(242 137 47 / 0.45);
-  --glass-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
-  --glass-hover-border: var(--line-strong);
-  --glass-hover-shadow: 0 16px 40px rgb(0 0 0 / 0.45);
-  --glass-focus-border: var(--ember);
-}
-
-body {
-  background: #0b0d12;
-  color: #e6e8ee;
+  --radius: 0.5rem;
+  --background: var(--color-base-100);
+  --foreground: var(--color-base-content);
+  --card: var(--color-base-200);
+  --card-foreground: var(--color-base-content);
+  --popover: var(--color-base-200);
+  --popover-foreground: var(--color-base-content);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-content);
+  --secondary: var(--color-base-300);
+  --secondary-foreground: var(--color-base-content);
+  --muted: var(--color-base-200);
+  --muted-foreground: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  --accent: var(--color-base-300);
+  --accent-foreground: var(--color-base-content);
+  --destructive: var(--color-error);
+  --input: var(--color-base-300);
+  --ring: var(--color-primary);
+  --chart-1: var(--color-primary);
+  --chart-2: var(--color-secondary);
+  --chart-3: var(--color-accent);
+  --chart-4: var(--color-info);
+  --chart-5: var(--color-warning);
 }
 
 .log-view {

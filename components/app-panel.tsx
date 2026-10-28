@@ -77,61 +77,61 @@ export function AppPanel({ app }: { app: string }) {
     setFileText(response.ok ? await response.text() : `Lỗi HTTP ${response.status}`);
   }
 
-  if (!detail) return <p className="text-sm text-white/50">Đang tải…</p>;
+  if (!detail) return <p className="text-sm text-base-content/50">Đang tải…</p>;
   const tab = (active: boolean) =>
-    `rounded-md px-3 py-1 text-sm ${active ? "bg-white/10 text-white" : "text-white/50 hover:text-white"}`;
+    `btn btn-sm ${active ? "btn-active" : "btn-ghost"}`;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold">{detail.name}</h1>
-        <p className="mt-1 text-sm text-white/50">
+        <p className="mt-1 text-sm text-base-content/50">
           {detail.domains.map((domain) => (
-            <a key={domain} href={`https://${domain}`} target="_blank" rel="noreferrer" className="mr-3 hover:text-white">
+            <a key={domain} href={`https://${domain}`} target="_blank" rel="noreferrer" className="mr-3 hover:text-base-content">
               {domain} ↗
             </a>
           ))}
         </p>
-        <p className="mt-1 text-xs text-white/40">
+        <p className="mt-1 text-xs text-base-content/40">
           {detail.repo} · nhánh {detail.branch} · nginx đang trỏ cổng {detail.activePort}
         </p>
       </div>
 
       <section className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm">
-          <h2 className="text-xs uppercase tracking-wide text-white/40">Bản đang chạy</h2>
+        <div className="rounded-xl border border-base-300 bg-base-200 p-4 text-sm">
+          <h2 className="text-xs uppercase tracking-wide text-base-content/40">Bản đang chạy</h2>
           {detail.release ? (
             <div className="mt-2 space-y-1">
               <p>
                 <span className="font-mono">{detail.release.commit}</span> {detail.release.subject}
               </p>
-              <p className="text-xs text-white/40">commit lúc {dateTime(detail.release.date)} · {detail.release.dir}</p>
+              <p className="text-xs text-base-content/40">commit lúc {dateTime(detail.release.date)} · {detail.release.dir}</p>
             </div>
           ) : (
-            <p className="mt-2 text-white/40">Chưa deploy.</p>
+            <p className="mt-2 text-base-content/40">Chưa deploy.</p>
           )}
           {detail.processes.map((proc) => (
-            <p key={proc.name} className="mt-2 text-xs text-white/60">
+            <p key={proc.name} className="mt-2 text-xs text-base-content/60">
               {proc.name}: {proc.status} · CPU {proc.cpu}% · RAM {bytes(proc.memory)} · chạy{" "}
               {proc.uptimeSince ? duration((now - proc.uptimeSince) / 1000) : "—"} · khởi động lại {proc.restarts} lần
             </p>
           ))}
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <h2 className="text-xs uppercase tracking-wide text-white/40">Thao tác</h2>
+        <div className="rounded-xl border border-base-300 bg-base-200 p-4">
+          <h2 className="text-xs uppercase tracking-wide text-base-content/40">Thao tác</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {ACTIONS.map((action) => (
               <button
                 key={action.action}
                 onClick={() => run(action)}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-sm hover:bg-white/10"
+                className="btn btn-outline btn-sm"
               >
                 {action.label}
               </button>
             ))}
           </div>
-          {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
-          <p className="mt-3 text-xs text-white/40">
+          {error && <p className="mt-3 text-sm text-error">{error}</p>}
+          <p className="mt-3 text-xs text-base-content/40">
             Deploy chạy nền trên server: đóng trang này vẫn chạy tiếp. Bản mới lỗi thì web vẫn giữ bản cũ.
           </p>
         </div>
@@ -161,28 +161,28 @@ export function AppPanel({ app }: { app: string }) {
           />
         )}
         {typeof view === "object" && (
-          <pre className="log-view h-96 overflow-auto rounded-lg border border-white/10 bg-black/50 p-3">{fileText}</pre>
+          <pre className="log-view h-96 overflow-auto rounded-lg border border-base-300 bg-base-300 p-3">{fileText}</pre>
         )}
       </section>
 
       <section className="grid gap-3 lg:grid-cols-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <h2 className="text-xs uppercase tracking-wide text-white/40">Lịch sử deploy</h2>
+        <div className="rounded-xl border border-base-300 bg-base-200 p-4">
+          <h2 className="text-xs uppercase tracking-wide text-base-content/40">Lịch sử deploy</h2>
           <ul className="mt-2 space-y-1.5 text-sm">
-            {detail.runs.length === 0 && <li className="text-white/40">Chưa có.</li>}
+            {detail.runs.length === 0 && <li className="text-base-content/40">Chưa có.</li>}
             {detail.runs.map((run) => (
               <li key={run.run} className="flex flex-wrap gap-x-2">
-                <span className={run.status === "ok" ? "text-emerald-300" : run.status === "fail" ? "text-red-300" : "text-sky-300"}>
+                <span className={run.status === "ok" ? "text-success" : run.status === "fail" ? "text-error" : "text-info"}>
                   {runLabel[run.status] ?? run.status}
                 </span>
                 <span>{run.action}</span>
-                <span className="font-mono text-white/50">{run.commit}</span>
-                {run.seconds !== undefined && <span className="text-white/40">{run.seconds}s</span>}
-                <span className="ml-auto text-xs text-white/40">
+                <span className="font-mono text-base-content/50">{run.commit}</span>
+                {run.seconds !== undefined && <span className="text-base-content/40">{run.seconds}s</span>}
+                <span className="ml-auto text-xs text-base-content/40">
                   {run.source}{run.by ? ` (${run.by})` : ""} · {ago(run.startedAt)}
                 </span>
                 {run.log && (
-                  <button className="text-xs text-sky-300 hover:underline" onClick={() => openFile(run.log!.split("/").pop()!)}>
+                  <button className="text-xs link link-info no-underline hover:underline" onClick={() => openFile(run.log!.split("/").pop()!)}>
                     log
                   </button>
                 )}
@@ -190,13 +190,13 @@ export function AppPanel({ app }: { app: string }) {
             ))}
           </ul>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-          <h2 className="text-xs uppercase tracking-wide text-white/40">File log deploy/build</h2>
+        <div className="rounded-xl border border-base-300 bg-base-200 p-4">
+          <h2 className="text-xs uppercase tracking-wide text-base-content/40">File log deploy/build</h2>
           <ul className="mt-2 space-y-1 text-sm">
-            {detail.logFiles.length === 0 && <li className="text-white/40">Chưa có.</li>}
+            {detail.logFiles.length === 0 && <li className="text-base-content/40">Chưa có.</li>}
             {detail.logFiles.map((file) => (
               <li key={file}>
-                <button className="font-mono text-xs text-sky-300 hover:underline" onClick={() => openFile(file)}>
+                <button className="font-mono text-xs link link-info no-underline hover:underline" onClick={() => openFile(file)}>
                   {file}
                 </button>
               </li>

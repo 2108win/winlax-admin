@@ -47,8 +47,8 @@ export function LogStream({
   const label = { connecting: "đang kết nối…", live: "trực tiếp", ended: "đã xong", error: "mất kết nối, đang thử lại…" }[state];
   return (
     <div>
-      <p className="mb-1 text-xs text-white/40">● {label}</p>
-      <pre ref={box} className={`log-view overflow-auto rounded-lg border border-white/10 bg-black/50 p-3 ${className}`}>
+      <p className="mb-1 text-xs text-base-content/40">● {label}</p>
+      <pre ref={box} className={`log-view overflow-auto rounded-lg border border-base-300 bg-base-300 p-3 ${className}`}>
         {lines.join("\n")}
       </pre>
     </div>
