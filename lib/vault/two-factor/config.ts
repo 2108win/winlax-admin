@@ -1,13 +1,9 @@
 import "server-only";
 
-import {
-  readFirstEnvironmentValue,
-} from "@/lib/vault/db/client";
-
+import { readFirstEnvironmentValue } from "@/lib/vault/db/client";
 
 export type VaultConfig = Readonly<{
   masterKey: Buffer;
-  password: string;
   databaseUrl: string;
 }>;
 
@@ -21,16 +17,16 @@ function decodeMasterKey(value: string | undefined): Buffer | null {
   }
 }
 
+/**
+ * The vault is opened by the admin login alone; it only needs the database and the key that
+ * encrypts the entries (the same TWO_FA_MASTER_KEY winlax-v2 used; changing it loses every entry).
+ */
 export function getVaultConfigurationErrors(): string[] {
   const errors: string[] = [];
-  const password = readFirstEnvironmentValue(["TWO_FA_VAULT_PASSWORD"]);
   const masterKey = readFirstEnvironmentValue(["TWO_FA_MASTER_KEY"]);
 
   if (!readFirstEnvironmentValue(["VAULT_DATABASE_URL"])) {
     errors.push("VAULT_DATABASE_URL");
-  }
-  if (!password) {
-    errors.push("TWO_FA_VAULT_PASSWORD");
   }
   if (!masterKey) {
     errors.push("TWO_FA_MASTER_KEY");
@@ -41,23 +37,14 @@ export function getVaultConfigurationErrors(): string[] {
   return errors;
 }
 
-/** Below this the owner is warned (not blocked) to turn on the unlock code. */
-export const RECOMMENDED_VAULT_PASSWORD_LENGTH = 12;
-
-export function isShortVaultPassword(): boolean {
-  const password = readFirstEnvironmentValue(["TWO_FA_VAULT_PASSWORD"]) ?? "";
-  return password.length < RECOMMENDED_VAULT_PASSWORD_LENGTH;
-}
-
 export function getVaultConfig(): VaultConfig {
   const errors = getVaultConfigurationErrors();
   if (errors.length > 0) {
-    throw new Error(`2FA vault chưa được cấu hình: ${errors.join(", ")}`);
+    throw new Error(`Vault chưa được cấu hình: ${errors.join(", ")}`);
   }
 
   return {
     masterKey: decodeMasterKey(process.env.TWO_FA_MASTER_KEY?.trim())!,
-    password: process.env.TWO_FA_VAULT_PASSWORD!.trim(),
     databaseUrl: readFirstEnvironmentValue(["VAULT_DATABASE_URL"])!,
   };
 }

@@ -3,19 +3,15 @@
 import {
   Check,
   Clipboard,
-  Clock3,
   ExternalLink,
   Eye,
   EyeOff,
   FileText,
   Inbox,
   KeyRound,
-  Lock,
   LockKeyhole,
   Pencil,
   ShieldAlert,
-  ShieldCheck,
-  Smartphone,
   Search,
   Trash2,
   UserRound,
@@ -33,21 +29,15 @@ import { useFormStatus } from "react-dom";
 
 import {
   deleteEntryAction,
-  lockEverywhereAction,
-  lockVaultAction,
   renameEntryAction,
   revealEntryDetailsAction,
 } from "./actions";
 import { BackupButton } from "./backup-button";
 import {
   SECRET_CLIPBOARD_SECONDS,
-  clearSecretNow,
   copySecret,
   copyText,
 } from "./secret-clipboard";
-import { SecurityPanel } from "./security-panel";
-import { useIdleLock } from "./use-idle-lock";
-import { VaultChrome } from "./vault-chrome";
 import { ImportPanel } from "./import-panel";
 import { MessagesPanel } from "./messages-panel";
 import {
@@ -465,7 +455,7 @@ function CredentialCard({
           />
         ) : (
           <div className="min-w-0 flex-1 pt-0.5">
-            <h3 className="font-display truncate text-base font-medium">
+            <h3 className="truncate text-sm font-semibold">
               {entry.issuer}
             </h3>
             <p className="text-muted-foreground truncate text-sm">
@@ -565,9 +555,9 @@ function CredentialCard({
   );
 }
 
-type VaultTab = "accounts" | "inbox" | "security";
+type VaultTab = "accounts" | "inbox";
 
-const tabPanel = "mt-6 data-[state=inactive]:hidden";
+const tabPanel = "mt-4 data-[state=inactive]:hidden";
 
 function matches(entry: VaultEntryView, query: string): boolean {
   const needle = query.trim().toLocaleLowerCase("vi");
@@ -577,78 +567,25 @@ function matches(entry: VaultEntryView, query: string): boolean {
   );
 }
 
-function SessionsCard({
-  activeSessions,
-  idleMinutes,
-}: {
-  activeSessions: number | null;
-  idleMinutes: number;
-}) {
-  return (
-    <aside
-      aria-labelledby="vault-sessions-title"
-      className="vault-card h-fit gap-4"
-    >
-      <h2 className="font-display text-xl" id="vault-sessions-title">
-        Phiên đăng nhập
-      </h2>
-      <dl className="grid gap-3 text-sm">
-        <div className="flex items-center justify-between gap-4">
-          <dt className="text-muted-foreground">Đang mở</dt>
-          <dd className="font-medium">
-            {activeSessions === null
-              ? "Không đọc được"
-              : `${activeSessions} phiên`}
-          </dd>
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <dt className="text-muted-foreground">Tự khóa</dt>
-          <dd className="font-medium">Sau {idleMinutes} phút không thao tác</dd>
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <dt className="text-muted-foreground">Hết hạn</dt>
-          <dd className="font-medium">Tối đa 8 giờ</dd>
-        </div>
-      </dl>
-      <p className="text-muted-foreground text-xs leading-5">
-        Dùng “Khóa ở mọi nơi” ở đầu trang để đăng xuất mọi trình duyệt ngay lập
-        tức. Nhớ tải bản sao lưu sau khi thêm nhiều tài khoản.
-      </p>
-    </aside>
-  );
-}
-
 export function VaultDashboard({
-  activeSessions,
-  idleSeconds,
   initialEntries,
   initialMessages,
   messagesFailed,
   renderedAt,
-  shortPassword,
-  unlockTotpEnabled,
 }: {
-  /** Browsers signed in right now, or null when the count could not be read. */
-  activeSessions: number | null;
-  idleSeconds: number;
   initialEntries: VaultEntryView[];
   initialMessages: readonly ContactMessage[];
   messagesFailed: boolean;
   /** Server time of this render, so the first client render shows the same countdown. */
   renderedAt: number;
-  /** The vault password is shorter than recommended. */
-  shortPassword: boolean;
-  unlockTotpEnabled: boolean;
 }) {
   const router = useRouter();
-  useIdleLock(idleSeconds);
   const [now, setNow] = useState(renderedAt);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [listNotice, setListNotice] = useState("");
   const [tab, setTab] = useState<VaultTab>("accounts");
   const [query, setQuery] = useState("");
   const lastRefreshAt = useRef(0);
-  const idleMinutes = Math.round(idleSeconds / 60);
   const entries = initialEntries.map((entry) =>
     !entry.isCorrupted && entry.expiresAt && now >= entry.expiresAt
       ? {
@@ -702,53 +639,16 @@ export function VaultDashboard({
   }, []);
 
   return (
-    <main className="vault-app flex flex-col gap-6" id="main-content">
-      <VaultChrome />
-      <header className="vault-head">
-        <div className="flex min-w-0 flex-col gap-3">
-          <p className="section-kicker">Khu vực riêng tư</p>
-          <h1 className="font-display text-4xl font-normal tracking-tight sm:text-5xl">
-            Private Vault
-          </h1>
-          <div className="flex flex-wrap gap-2">
-            <span className="vault-chip vault-chip-ok">
-              <ShieldCheck aria-hidden="true" />
-              Mã hóa trước khi lưu
-            </span>
-            <span className="vault-chip">
-              <Clock3 aria-hidden="true" />
-              Tự khóa sau {idleMinutes} phút không thao tác
-            </span>
-            <button
-              className={`vault-chip ${unlockTotpEnabled ? "vault-chip-ok" : "vault-chip-warn"}`}
-              onClick={() => setTab("security")}
-              type="button"
-            >
-              <Smartphone aria-hidden="true" />
-              {unlockTotpEnabled
-                ? "Mã xác minh: đang bật"
-                : "Mã xác minh: đang tắt"}
-            </button>
-          </div>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold">Vault 2FA</h1>
+          <p className="text-sm text-white/50">
+            Mật khẩu, mã 2FA và ghi chú, mã hoá trong database winlax_v2. Mở bằng đăng nhập trang quản trị.
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <BackupButton />
-          <form action={lockEverywhereAction} onSubmit={clearSecretNow}>
-            <Button className="min-h-11" type="submit" variant="outline">
-              <LockKeyhole data-icon="inline-start" />
-              {activeSessions && activeSessions > 1
-                ? `Khóa ở mọi nơi (${activeSessions} phiên)`
-                : "Khóa ở mọi nơi"}
-            </Button>
-          </form>
-          <form action={lockVaultAction} onSubmit={clearSecretNow}>
-            <Button className="min-h-11" type="submit">
-              <Lock data-icon="inline-start" />
-              Khóa vault
-            </Button>
-          </form>
-        </div>
-      </header>
+        <BackupButton />
+      </div>
 
       <Tabs onValueChange={(value) => setTab(value as VaultTab)} value={tab}>
         <TabsList
@@ -772,15 +672,6 @@ export function VaultDashboard({
               </span>
             ) : null}
           </TabsTrigger>
-          <TabsTrigger value="security">
-            <ShieldCheck aria-hidden="true" className="size-4" />
-            Bảo mật
-            {unlockTotpEnabled ? null : (
-              <span className="vault-dot">
-                <span className="sr-only">, cần bật mã xác minh</span>
-              </span>
-            )}
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent className={tabPanel} forceMount value="accounts">
@@ -792,14 +683,14 @@ export function VaultDashboard({
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <h2
-                    className="font-display text-2xl font-medium"
+                    className="text-base font-semibold"
                     id="vault-list-title"
                   >
                     Tài khoản của bạn
                   </h2>
                   <p
                     aria-live="polite"
-                    className="text-muted-foreground mt-1 text-sm"
+                    className="mt-0.5 text-sm text-white/50"
                   >
                     {copiedId
                       ? `Đã sao chép mã, tự xóa sau ${SECRET_CLIPBOARD_SECONDS} giây`
@@ -873,19 +764,7 @@ export function VaultDashboard({
           />
         </TabsContent>
 
-        <TabsContent className={tabPanel} forceMount value="security">
-          <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_23rem]">
-            <SecurityPanel
-              enabled={unlockTotpEnabled}
-              shortPassword={shortPassword}
-            />
-            <SessionsCard
-              activeSessions={activeSessions}
-              idleMinutes={idleMinutes}
-            />
-          </div>
-        </TabsContent>
       </Tabs>
-    </main>
+    </div>
   );
 }

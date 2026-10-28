@@ -14,12 +14,14 @@ vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
 
 ## Vault 2FA (/vault)
 
-Chuyển nguyên từ winlax-v2 (`src/app/2fa`, `src/lib/two-factor`, `db`, `security`, `contact`,
-`components/ui`) vào `app/(admin)/vault` và `lib/vault/`; code mã hoá, kho và phiên giữ nguyên
-từng dòng. Dữ liệu vẫn nằm trong database `winlax_v2`, đọc bằng role `winlax_v2`
-(`VAULT_DATABASE_URL`) với cùng `TWO_FA_MASTER_KEY`, `TWO_FA_VAULT_PASSWORD`,
-`SECURITY_HASH_SECRET`. Vault giờ nằm sau đăng nhập Google + 2FA của trang quản trị và vẫn
-giữ mật khẩu vault riêng, nên không còn cần đường dẫn bí mật.
+Chuyển từ winlax-v2 vào `app/(admin)/vault` và `lib/vault/`. Dữ liệu vẫn nằm trong database
+`winlax_v2`, đọc bằng role `winlax_v2` (`VAULT_DATABASE_URL`) và giải mã bằng `TWO_FA_MASTER_KEY`.
+
+Vault không có khoá riêng: đăng nhập trang quản trị (Google + 2FA) là mở được. Không còn mật khẩu
+vault, mã mở khoá, tự khoá hay danh sách phiên. Mỗi server action tự kiểm tra phiên đăng nhập quản
+trị, vì action gọi được bằng POST trực tiếp mà không qua layout. Bảng `vault_sessions` và
+`vault_settings` vẫn còn trong `winlax_v2` nhưng không dùng nữa (keep-alive của winlax-v2 vẫn dọn
+`vault_sessions`, nên đừng xoá bảng).
 
 ## Biến môi trường (`/var/www/winlax-admin/shared/.env.production.local`)
 
@@ -31,7 +33,7 @@ giữ mật khẩu vault riêng, nên không còn cần đường dẫn bí mậ
 | `DATABASE_URL` | Postgres `winlax_admin` (role superuser, dùng cho SQL console) |
 | `ADMIN_SECRET_KEY` | 32 byte base64, mã hoá secret 2FA và cookie OAuth |
 | `VAULT_DATABASE_URL` | Database `winlax_v2` (role `winlax_v2`), nơi có bảng vault và hộp thư liên hệ |
-| `TWO_FA_MASTER_KEY`, `TWO_FA_VAULT_PASSWORD`, `SECURITY_HASH_SECRET` | Giống hệt winlax-v2; đổi `TWO_FA_MASTER_KEY` là mất toàn bộ dữ liệu vault |
+| `TWO_FA_MASTER_KEY`, `SECURITY_HASH_SECRET` | Giống hệt winlax-v2; đổi `TWO_FA_MASTER_KEY` là mất toàn bộ dữ liệu vault |
 
 ## Đặt lại 2FA (mất điện thoại)
 

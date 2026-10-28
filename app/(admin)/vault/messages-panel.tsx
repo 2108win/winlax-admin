@@ -151,10 +151,10 @@ export function MessagesPanel({
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="section-kicker">Hộp thư liên hệ</p>
-          <h2 className="font-display mt-1 text-2xl" id="vault-messages-title">
-            Tin nhắn từ website
+          <h2 className="text-base font-semibold" id="vault-messages-title">
+            Tin nhắn liên hệ từ winlax.id.vn
           </h2>
+          <p className="text-sm text-white/50">Form liên hệ trên web lưu vào đây.</p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline">{messages.length} tin nhắn</Badge>

@@ -1,17 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function TwoFactorLoading() {
+export default function VaultLoading() {
   return (
-    <main
-      className="flex min-h-[68dvh] items-center justify-center"
-      id="main-content"
-    >
-      <div className="flex w-full max-w-md flex-col gap-4">
-        <Skeleton className="mx-auto size-12 rounded-xl" />
-        <Skeleton className="mx-auto h-8 w-48" />
-        <Skeleton className="h-11 w-full" />
-        <Skeleton className="h-11 w-full" />
+    <div className="space-y-4">
+      <Skeleton className="h-7 w-40" />
+      <Skeleton className="h-9 w-64" />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
       </div>
-    </main>
+    </div>
   );
 }
