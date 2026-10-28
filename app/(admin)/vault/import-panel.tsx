@@ -11,7 +11,6 @@ import {
   ListPlus,
   Plus,
   ScanLine,
-  Upload,
   X,
 } from "lucide-react";
 import type { ChangeEvent, ReactNode } from "react";
@@ -30,14 +29,6 @@ import { createEntriesAction, createEntryAction } from "./actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -1236,66 +1227,97 @@ function BulkImport() {
   );
 }
 
-export function ImportPanel({
+/** "Thêm tài khoản" button that opens the add/import forms in a modal dialog. */
+export function AddAccountDialog({
   existing,
 }: {
   /** Accounts already in the vault, so a QR import can flag them. */
   existing: readonly ExistingAccount[];
 }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  // The forms only exist while the dialog is open: closing it stops the camera and clears them.
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+
   return (
-    // Sticky beside a long list, so it scrolls on its own once a QR import makes it tall.
-    <Card className="glass-content h-fit lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto">
-      <CardHeader>
-        <CardTitle asChild>
-          <h2 className="flex items-center gap-2">
-            <KeyRound aria-hidden="true" />
-            Thêm tài khoản
-          </h2>
-        </CardTitle>
-        <CardDescription className="leading-6">
-          Lưu mật khẩu, ghi chú và 2FA trong cùng một bản ghi đã mã hóa, hoặc
-          nhập nhanh từ QR.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="manual">
-          <TabsList className="grid h-auto w-full grid-cols-2 gap-1">
-            <TabsTrigger className="min-h-11" value="manual">
-              <KeyRound aria-hidden="true" className="size-4" />
-              Thủ công
-            </TabsTrigger>
-            <TabsTrigger className="min-h-11" value="image">
-              <FileImage aria-hidden="true" className="size-4" />
-              Ảnh QR
-            </TabsTrigger>
-            <TabsTrigger className="min-h-11" value="camera">
-              <Camera aria-hidden="true" className="size-4" />
-              Camera
-            </TabsTrigger>
-            <TabsTrigger className="min-h-11" value="bulk">
-              <ListPlus aria-hidden="true" className="size-4" />
-              Hàng loạt
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent className="mt-6" value="manual">
-            <ManualEntryForm />
-          </TabsContent>
-          <TabsContent className="mt-6" value="image">
-            <ImageImport existing={existing} />
-          </TabsContent>
-          <TabsContent className="mt-6" value="camera">
-            <CameraImport existing={existing} />
-          </TabsContent>
-          <TabsContent className="mt-6" value="bulk">
-            <BulkImport />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="text-muted-foreground flex items-start gap-2 text-xs leading-5">
-        <Upload aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-        QR và tệp chỉ được đọc khi bạn chọn. Mật khẩu và secret được gửi qua
-        server action bảo vệ bởi phiên vault.
-      </CardFooter>
-    </Card>
+    <>
+      <Button onClick={() => setOpen(true)} type="button">
+        <Plus data-icon="inline-start" />
+        Thêm tài khoản
+      </Button>
+      <dialog
+        aria-labelledby="vault-add-title"
+        className="vault-dialog"
+        onClick={(event) => {
+          // A click on the backdrop lands on the dialog element itself.
+          if (event.target === event.currentTarget) setOpen(false);
+        }}
+        onClose={() => setOpen(false)}
+        ref={dialogRef}
+      >
+        {open ? (
+          <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
+            <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+              <div>
+                <h2 className="text-base font-semibold" id="vault-add-title">
+                  Thêm tài khoản
+                </h2>
+                <p className="mt-0.5 text-sm text-white/50">
+                  Nhập tay, hoặc quét QR từ ảnh, camera hay danh sách otpauth://.
+                </p>
+              </div>
+              <button
+                aria-label="Đóng"
+                className="vault-icon-button -mt-1 -mr-2"
+                onClick={() => setOpen(false)}
+                type="button"
+              >
+                <X aria-hidden="true" />
+              </button>
+            </div>
+            <div className="overflow-y-auto px-5 py-4">
+              <Tabs defaultValue="manual">
+                <TabsList className="vault-tabs-list">
+                  <TabsTrigger value="manual">
+                    <KeyRound aria-hidden="true" className="size-4" />
+                    Thủ công
+                  </TabsTrigger>
+                  <TabsTrigger value="image">
+                    <FileImage aria-hidden="true" className="size-4" />
+                    Ảnh QR
+                  </TabsTrigger>
+                  <TabsTrigger value="camera">
+                    <Camera aria-hidden="true" className="size-4" />
+                    Camera
+                  </TabsTrigger>
+                  <TabsTrigger value="bulk">
+                    <ListPlus aria-hidden="true" className="size-4" />
+                    Hàng loạt
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent className="mt-4" value="manual">
+                  <ManualEntryForm />
+                </TabsContent>
+                <TabsContent className="mt-4" value="image">
+                  <ImageImport existing={existing} />
+                </TabsContent>
+                <TabsContent className="mt-4" value="camera">
+                  <CameraImport existing={existing} />
+                </TabsContent>
+                <TabsContent className="mt-4" value="bulk">
+                  <BulkImport />
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+        ) : null}
+      </dialog>
+    </>
   );
 }

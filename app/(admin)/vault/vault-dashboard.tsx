@@ -38,7 +38,7 @@ import {
   copySecret,
   copyText,
 } from "./secret-clipboard";
-import { ImportPanel } from "./import-panel";
+import { AddAccountDialog } from "./import-panel";
 import { MessagesPanel } from "./messages-panel";
 import {
   AlertDialog,
@@ -647,7 +647,10 @@ export function VaultDashboard({
             Mật khẩu, mã 2FA và ghi chú, mã hoá trong database winlax_v2. Mở bằng đăng nhập trang quản trị.
           </p>
         </div>
-        <BackupButton />
+        <div className="flex flex-wrap items-start gap-2">
+          <BackupButton />
+          <AddAccountDialog existing={initialEntries} />
+        </div>
       </div>
 
       <Tabs onValueChange={(value) => setTab(value as VaultTab)} value={tab}>
@@ -675,7 +678,7 @@ export function VaultDashboard({
         </TabsList>
 
         <TabsContent className={tabPanel} forceMount value="accounts">
-          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]">
+          <div>
             <section
               aria-labelledby="vault-list-title"
               className="flex min-w-0 flex-col gap-4"
@@ -751,9 +754,6 @@ export function VaultDashboard({
               )}
             </section>
 
-            <aside aria-label="Thêm tài khoản mới">
-              <ImportPanel existing={initialEntries} />
-            </aside>
           </div>
         </TabsContent>
 

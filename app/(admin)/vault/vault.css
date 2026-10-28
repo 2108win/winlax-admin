@@ -176,3 +176,19 @@
     transition: none;
   }
 }
+
+.vault-dialog {
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 0.75rem;
+  background: #11141b;
+  padding: 0;
+  color: white;
+}
+
+.vault-dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
