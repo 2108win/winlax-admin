@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/logout-button";
+import { StepUpProvider } from "@/components/step-up";
 import { getSession } from "@/lib/auth";
 import { listApps } from "@/lib/server/apps";
 
@@ -26,6 +27,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
           <p className="px-3 pt-3 pb-1 text-xs uppercase tracking-wide text-white/30">Hệ thống</p>
           <Link href="/deploys" className={link}>Lịch sử deploy</Link>
+          <Link href="/database" className={link}>Database & SQL</Link>
+          <Link href="/backups" className={link}>Sao lưu</Link>
+          <Link href="/terminal" className={link}>Terminal</Link>
           <Link href="/audit" className={link}>Nhật ký thao tác</Link>
         </nav>
         <div className="mt-6 space-y-1 px-3">
@@ -33,7 +37,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <LogoutButton />
         </div>
       </aside>
-      <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
+      <main className="min-w-0 flex-1 p-4 md:p-8">
+        <StepUpProvider>{children}</StepUpProvider>
+      </main>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { EnvEditor } from "@/components/env-editor";
 import { LogStream } from "@/components/log-stream";
 import { ago, bytes, dateTime, duration } from "@/lib/format";
 
@@ -135,6 +136,8 @@ export function AppPanel({ app }: { app: string }) {
           </p>
         </div>
       </section>
+
+      <EnvEditor app={detail.name} />
 
       <section>
         <div className="mb-2 flex flex-wrap gap-1">

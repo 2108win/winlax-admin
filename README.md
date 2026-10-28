@@ -1,7 +1,12 @@
 # winlax-admin
 
 Trang quản trị VPS tại https://db.winlax.id.vn: thông số máy, trạng thái và deploy/restart/rollback
-3 web (winlax-v2, local-film, tkbww), log trực tiếp, lịch sử deploy, nhật ký thao tác.
+3 web (winlax-v2, local-film, tkbww), log trực tiếp, lịch sử deploy, nhật ký thao tác, sửa biến môi
+trường, sao lưu/khôi phục PostgreSQL, chạy SQL trên mọi database và terminal root trên web.
+
+Sửa biến môi trường, tải/khôi phục bản sao lưu, Database & SQL và Terminal đều đòi nhập lại mã 2FA
+(hiệu lực 10 phút). Terminal dùng `bin/pty-bridge.py` (module `pty` của Python) thay cho node-pty,
+vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
 
 - Đăng nhập: Google (chỉ `ADMIN_EMAIL`) rồi mã 2FA (TOTP). Thao tác nguy hiểm đòi nhập lại mã 2FA.
 - Chạy bằng `deploy winlax-admin` như các web khác (root, pm2, sau nginx).

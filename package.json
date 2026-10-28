@@ -11,6 +11,8 @@
     "test": "node --test lib/*.test.ts"
   },
   "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "next": "16.3.8",
     "pg": "^8.23.1",
     "qrcode": "^1.5.4",
