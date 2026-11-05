@@ -42,7 +42,7 @@ import type {
 
 /**
  * Server actions are reachable by a direct POST, so each one checks the admin login itself
- * (Google + password): the layout's redirect only guards page renders. The vault has no lock of its
+ * (Google + 2FA): the layout's redirect only guards page renders. The vault has no lock of its
  * own any more.
  */
 async function requireVaultSession(): Promise<void> {

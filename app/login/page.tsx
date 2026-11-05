@@ -20,7 +20,7 @@ export default async function LoginPage({
     <main className="flex min-h-screen items-center justify-center p-6">
       <div className="w-full max-w-sm rounded-2xl border border-base-300 bg-base-200 p-8">
         <h1 className="text-lg font-semibold">Quản trị VPS winlax</h1>
-        <p className="mt-1 text-sm text-base-content/60">Đăng nhập Google, sau đó nhập mật khẩu.</p>
+        <p className="mt-1 text-sm text-base-content/60">Đăng nhập Google, sau đó nhập mã 2FA.</p>
         {error && ERRORS[error] && (
           <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{ERRORS[error]}</p>
         )}

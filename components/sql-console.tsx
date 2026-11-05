@@ -79,7 +79,7 @@ export function SqlConsole() {
     return (
       <div className="space-y-3">
         <h1 className="text-xl font-semibold">Database & SQL</h1>
-        <p className="text-sm text-base-content/50">Toàn quyền trên mọi database của VPS (role superuser). Cần nhập lại mật khẩu.</p>
+        <p className="text-sm text-base-content/50">Toàn quyền trên mọi database của VPS (role superuser). Cần nhập lại mã 2FA.</p>
         <button onClick={() => load()} className="btn btn-primary btn-sm">Mở</button>
         {error && <p className="text-sm text-error">{error}</p>}
       </div>

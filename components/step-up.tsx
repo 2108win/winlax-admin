@@ -2,15 +2,15 @@
 
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 
-import { PasswordForm } from "@/components/password-form";
+import { TotpForm } from "@/components/totp-form";
 
 type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
 const StepUpContext = createContext<Fetcher | null>(null);
 
 /**
- * fetch() that, when an API answers 428 (password needed again), asks for the
- * password and retries the request once.
+ * fetch() that, when an API answers 428 (fresh 2FA needed), asks for the code
+ * and retries the request once.
  */
 export function StepUpProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -47,9 +47,9 @@ export function StepUpProvider({ children }: { children: React.ReactNode }) {
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-sm rounded-2xl border border-base-300 bg-base-100 shadow-xl p-6">
-            <h2 className="font-semibold">Xác nhận lại bằng mật khẩu</h2>
-            <p className="mt-1 text-sm text-base-content/60">Thao tác này cần nhập lại mật khẩu (có hiệu lực 10 phút).</p>
-            <PasswordForm endpoint="/api/auth/stepup" onDone={() => finish(true)} />
+            <h2 className="font-semibold">Xác nhận lại bằng mã 2FA</h2>
+            <p className="mt-1 text-sm text-base-content/60">Thao tác này cần mã mới (có hiệu lực 10 phút).</p>
+            <TotpForm endpoint="/api/auth/stepup" onDone={() => finish(true)} />
             <button onClick={() => finish(false)} className="mt-3 w-full text-sm text-base-content/50 hover:text-base-content">
               Huỷ
             </button>

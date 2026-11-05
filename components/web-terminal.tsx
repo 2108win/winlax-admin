@@ -108,7 +108,7 @@ export function WebTerminal() {
       </div>
       {!started ? (
         <div className="space-y-3 text-sm text-base-content/60">
-          <p>Shell bash với quyền root trên VPS, giống SSH. Cần nhập lại mật khẩu. Đóng trang là đóng shell; để yên 30 phút cũng tự đóng.</p>
+          <p>Shell bash với quyền root trên VPS, giống SSH. Cần nhập lại mã 2FA. Đóng trang là đóng shell; để yên 30 phút cũng tự đóng.</p>
           <button onClick={() => setStarted(true)} className="btn btn-primary btn-sm">
             Mở terminal
           </button>

@@ -35,5 +35,5 @@ export async function GET(request: NextRequest) {
   }
 
   await createPendingLogin(email);
-  return back("/login/password");
+  return back("/login/2fa");
 }
