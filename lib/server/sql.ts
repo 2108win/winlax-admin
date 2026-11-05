@@ -1,12 +1,22 @@
 import type { QueryResult } from "pg";
 
 import { query, withDatabase } from "../db";
+import { listApps } from "./apps";
 
 const MAX_ROWS = 1000;
 
+/**
+ * Only the projects' own databases, one per app in apps.conf (winlax-v2 → winlax_v2).
+ * The SQL routes accept nothing else, so postgres and any other database stay out of reach.
+ */
 export async function listDatabases() {
+  const names = (await listApps()).map((app) => app.name.replace(/-/g, "_"));
   return query<{ name: string; size: string }>(
-    "select datname as name, pg_database_size(datname)::text as size from pg_database where not datistemplate order by 1",
+    `select datname as name, pg_database_size(datname)::text as size
+       from pg_database
+      where not datistemplate and datname = any($1::text[])
+      order by 1`,
+    [names],
   );
 }
 

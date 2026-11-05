@@ -2,7 +2,7 @@
 
 Trang quản trị VPS tại https://db.winlax.id.vn: thông số máy, trạng thái và deploy/restart/rollback
 3 web (winlax-v2, local-film, tkbww), log trực tiếp, lịch sử deploy, nhật ký thao tác, sửa biến môi
-trường, sao lưu/khôi phục PostgreSQL, chạy SQL trên mọi database và terminal root trên web.
+trường, sao lưu/khôi phục PostgreSQL, chạy SQL trên database của các dự án (mỗi web trong `apps.conf` một database, ví dụ `winlax-v2` → `winlax_v2`; không có `postgres` hay database khác) và terminal root trên web.
 
 Sửa biến môi trường, tải/khôi phục bản sao lưu, Database & SQL và Terminal đều đòi nhập lại mã 2FA
 (hiệu lực 10 phút). Terminal dùng `bin/pty-bridge.py` (module `pty` của Python) thay cho node-pty,

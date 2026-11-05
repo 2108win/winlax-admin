@@ -1,9 +1,9 @@
 import { requireApiSession } from "@/lib/auth";
-import { query } from "@/lib/db";
 import { json } from "@/lib/security";
 import { activePort, currentRelease, listApps, pm2Processes, processesOf } from "@/lib/server/apps";
 import { deployRuns } from "@/lib/server/history";
 import { certificates, latestBackups, systemMetrics } from "@/lib/server/metrics";
+import { listDatabases } from "@/lib/server/sql";
 
 export async function GET(request: Request) {
   const session = await requireApiSession(request);
@@ -13,9 +13,7 @@ export async function GET(request: Request) {
     systemMetrics(),
     listApps(),
     pm2Processes(),
-    query<{ name: string; size: string }>(
-      "select datname as name, pg_database_size(datname)::text as size from pg_database where not datistemplate order by 1",
-    ),
+    listDatabases(),
     certificates(),
     latestBackups(),
     deployRuns(10),

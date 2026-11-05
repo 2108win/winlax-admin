@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Pool, types } from "pg";
+import { Pool, types, type CustomTypesConfig } from "pg";
 
 import { DbExecutionError, type QueryExecutor, type QuerySpec } from "@/lib/vault/db/query";
 
@@ -10,9 +10,17 @@ const toIso = (value: string) => {
   const date = new Date(value.replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00"));
   return Number.isNaN(date.getTime()) ? value : date.toISOString();
 };
-types.setTypeParser(1184, toIso); // timestamptz
-types.setTypeParser(1114, (value) => toIso(`${value}Z`)); // timestamp
-types.setTypeParser(20, (value) => Number(value)); // int8
+const VAULT_PARSERS: Record<number, (value: string) => unknown> = {
+  1184: toIso, // timestamptz
+  1114: (value) => toIso(`${value}Z`), // timestamp
+  20: (value) => Number(value), // int8
+};
+// Only for the vault's pool: types.setTypeParser() would change every pg connection in the
+// process, and the admin's own queries need real Date objects (session step-up checks).
+const vaultTypes = {
+  getTypeParser: (oid: number, format?: "text" | "binary") =>
+    (format !== "binary" && VAULT_PARSERS[oid]) || types.getTypeParser(oid, format),
+} as CustomTypesConfig;
 
 const IDENTIFIER = /^[a-z_][a-z0-9_]*$/;
 
@@ -83,7 +91,13 @@ function getPool(connectionString: string, timeoutMs: number) {
   globalForPool.__winlaxPools ??= new Map();
   let pool = globalForPool.__winlaxPools.get(connectionString);
   if (!pool) {
-    pool = new Pool({ connectionString, connectionTimeoutMillis: timeoutMs, max: 5, query_timeout: timeoutMs });
+    pool = new Pool({
+      connectionString,
+      connectionTimeoutMillis: timeoutMs,
+      max: 5,
+      query_timeout: timeoutMs,
+      types: vaultTypes,
+    });
     globalForPool.__winlaxPools.set(connectionString, pool);
   }
   return pool;
