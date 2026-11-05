@@ -2,8 +2,8 @@ import { cookies } from "next/headers";
 
 import { decrypt, encrypt, randomToken, sha256 } from "./crypto";
 import { query } from "./db";
+import { verifyPassword } from "./password";
 import { clientIp, isSameOrigin, json } from "./security";
-import { verifyCode } from "./totp";
 
 export const SESSION_COOKIE = "__Host-wa_session";
 export const PENDING_COOKIE = "__Host-wa_pending";
@@ -11,7 +11,7 @@ export const OAUTH_COOKIE = "__Host-wa_oauth";
 
 const SESSION_HOURS = 12;
 const PENDING_MINUTES = 10;
-/** Dangerous actions (terminal, SQL writes, env, vault) need a fresh 2FA code. */
+/** Dangerous actions (terminal, SQL, env, backups) need the password again. */
 export const STEP_UP_MINUTES = 10;
 
 const FAILURE_WINDOW_MINUTES = 15;
@@ -70,7 +70,7 @@ export async function requireApiSession(
   const session = await getSession();
   if (!session) return json({ error: "Chưa đăng nhập." }, 401);
   if (options.stepUp && !hasFreshStepUp(session)) {
-    return json({ error: "Cần nhập lại mã 2FA.", stepUp: true }, 428);
+    return json({ error: "Cần nhập lại mật khẩu.", stepUp: true }, 428);
   }
   return session;
 }
@@ -126,7 +126,7 @@ export async function takeOAuthState(): Promise<{ state: string; verifier: strin
   return plain ? (JSON.parse(plain) as { state: string; verifier: string }) : null;
 }
 
-/* ---------- Pending login (Google done, 2FA not yet) ---------- */
+/* ---------- Pending login (Google done, password not yet) ---------- */
 
 export async function createPendingLogin(email: string): Promise<void> {
   const token = randomToken();
@@ -143,30 +143,17 @@ export async function createPendingLogin(email: string): Promise<void> {
   });
 }
 
-export type PendingLogin = { tokenHash: string; email: string; enrollSecret: string | null };
+export type PendingLogin = { tokenHash: string; email: string };
 
 export async function getPendingLogin(): Promise<PendingLogin | null> {
   const token = (await cookies()).get(PENDING_COOKIE)?.value;
   if (!token) return null;
-  const rows = await query<{ token_hash: string; email: string; enroll_secret: string | null }>(
-    "select token_hash, email, enroll_secret from admin_pending_logins where token_hash = $1 and expires_at > now()",
+  const rows = await query<{ token_hash: string; email: string }>(
+    "select token_hash, email from admin_pending_logins where token_hash = $1 and expires_at > now()",
     [sha256(token)],
   );
   const row = rows[0];
-  return row
-    ? {
-        tokenHash: row.token_hash,
-        email: row.email,
-        enrollSecret: row.enroll_secret ? decrypt(row.enroll_secret) : null,
-      }
-    : null;
-}
-
-export async function setEnrollSecret(pending: PendingLogin, secret: string): Promise<void> {
-  await query("update admin_pending_logins set enroll_secret = $2 where token_hash = $1", [
-    pending.tokenHash,
-    encrypt(secret),
-  ]);
+  return row ? { tokenHash: row.token_hash, email: row.email } : null;
 }
 
 export async function finishPendingLogin(pending: PendingLogin): Promise<void> {
@@ -174,25 +161,34 @@ export async function finishPendingLogin(pending: PendingLogin): Promise<void> {
   (await cookies()).delete(PENDING_COOKIE);
 }
 
-/* ---------- TOTP secret, replay guard and rate limit ---------- */
+/* ---------- Admin password and rate limit ---------- */
 
-export async function getTotpSecret(): Promise<string | null> {
+/** The scrypt hash of the admin password, or null before it is first set. */
+export async function getPasswordHash(): Promise<string | null> {
   const rows = await query<{ value: string }>(
-    "select value from admin_settings where key = 'totp_secret'",
+    "select value from admin_settings where key = 'password_hash'",
   );
-  return rows[0] ? decrypt(rows[0].value) : null;
+  return rows[0]?.value ?? null;
 }
 
-export async function saveTotpSecret(secret: string): Promise<void> {
-  await query(
-    `insert into admin_settings (key, value) values ('totp_secret', $1)
-     on conflict (key) do nothing`,
-    [encrypt(secret)],
+/** First set only: returns false when a password already exists. */
+export async function savePasswordHash(hash: string): Promise<boolean> {
+  const rows = await query(
+    `insert into admin_settings (key, value) values ('password_hash', $1)
+     on conflict (key) do nothing
+     returning key`,
+    [hash],
   );
+  return rows.length === 1;
+}
+
+export async function checkPassword(password: string): Promise<boolean> {
+  const stored = await getPasswordHash();
+  return stored !== null && password.length > 0 && (await verifyPassword(stored, password));
 }
 
 /**
- * Only wrong 2FA codes count: a Google login with another account must not be
+ * Only wrong passwords count: a Google login with another account must not be
  * able to fill the global bucket and lock the real admin out.
  */
 export async function isRateLimited(request: Request): Promise<boolean> {
@@ -201,7 +197,7 @@ export async function isRateLimited(request: Request): Promise<boolean> {
        count(*) filter (where ip = $1 and at > now() - make_interval(mins => $2)) as by_ip,
        count(*) filter (where at > now() - interval '1 hour') as global
      from admin_auth_failures
-     where kind in ('totp', 'stepup')`,
+     where kind in ('password', 'stepup')`,
     [clientIp(request), FAILURE_WINDOW_MINUTES],
   );
   return (
@@ -216,20 +212,6 @@ export async function recordFailure(request: Request, kind: string): Promise<voi
     kind,
   ]);
   await query("delete from admin_auth_failures where at < now() - interval '1 day'");
-}
-
-/** Verifies a code once: a counter already used cannot be used again. */
-export async function consumeTotp(secret: string, code: string): Promise<boolean> {
-  const counter = verifyCode(secret, code);
-  if (counter === null) return false;
-  const rows = await query(
-    `insert into admin_settings (key, value) values ('totp_last_counter', $1)
-     on conflict (key) do update set value = excluded.value, updated_at = now()
-       where admin_settings.value::bigint < excluded.value::bigint
-     returning key`,
-    [String(counter)],
-  );
-  return rows.length === 1;
 }
 
 export async function markStepUp(session: Session): Promise<void> {

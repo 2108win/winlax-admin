@@ -16,7 +16,7 @@ function Notice({ title, children }: { title: string; children: React.ReactNode 
   );
 }
 
-/** The admin layout already requires the Google + 2FA login, so the vault opens straight away. */
+/** The admin layout already requires the Google + password login, so the vault opens straight away. */
 export async function PrivateVaultPage() {
   const configurationErrors = getVaultConfigurationErrors();
   if (configurationErrors.length > 0) {
