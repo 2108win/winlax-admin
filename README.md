@@ -32,9 +32,24 @@ bằng role `winlax_v2` qua `VAULT_DATABASE_URL`). Code: `app/(admin)/inbox` và
 action tự kiểm tra phiên đăng nhập, vì action gọi được bằng POST trực tiếp mà không qua layout. Xoá tin
 nhắn được ghi vào Nhật ký thao tác (`contact.delete`).
 
-Vault 2FA đã chuyển hẳn sang trang công khai https://winlax.id.vn/2fa (06/11/2026) và đã gỡ khỏi đây.
-Bảng cũ `two_factor_entries` trong `winlax_v2` và biến `TWO_FA_MASTER_KEY` vẫn giữ làm bản dự phòng,
-code không dùng nữa. Chỉ xoá khi chủ web đồng ý.
+## Vault 2FA (/vault)
+
+Vault là tài khoản `/2fa` của chủ web (`ADMIN_EMAIL`) trên https://winlax.id.vn/2fa: cùng các dòng
+trong bảng `twofa_entries` (database `winlax_v2`), nên thêm, đổi tên hay xoá ở bên nào thì bên kia
+cũng thấy sau khi tải lại trang. Người dùng khác của /2fa không bao giờ hiện ở đây: mọi truy vấn lọc
+theo `user_id` của chủ web.
+
+- Mã hoá bằng `TWOFA_MASTER_KEY`, **phải giống hệt env winlax-v2**. Khác khoá là mọi mục hiện "Không thể
+  giải mã" ở trang này.
+- `lib/vault/two-factor/shared-crypto.ts` là bản chép của `src/lib/twofa/crypto.ts` bên winlax-v2. Sửa
+  bên nào phải sửa y hệt bên kia.
+- Giới hạn theo /2fa: tên 120, tài khoản 200 (không bắt buộc), mật khẩu 4.096, ghi chú 5.000 ký tự,
+  tối đa 1.000 mục.
+- Mã TOTP tính trên server, trình duyệt không nhận secret. Mọi thao tác ghi vào Nhật ký thao tác
+  (`vault.create`, `vault.rename`, `vault.delete`, `vault.reveal`, `vault.backup`), chỉ có id và số lượng.
+
+Vault cũ (bảng `two_factor_entries`, khoá `TWO_FA_MASTER_KEY`, dùng tới 06/11/2026) đã chép sang /2fa.
+Bảng và khoá vẫn giữ làm bản dự phòng theo ý chủ web, code không còn đọc.
 
 ## Biến môi trường (`/var/www/winlax-admin/shared/.env.production.local`)
 
@@ -46,7 +61,8 @@ code không dùng nữa. Chỉ xoá khi chủ web đồng ý.
 | `DATABASE_URL` | Postgres `winlax_admin` (role superuser, dùng cho SQL console) |
 | `ADMIN_SECRET_KEY` | 32 byte base64, mã hoá secret 2FA và cookie OAuth |
 | `VAULT_DATABASE_URL` | Database `winlax_v2` (role `winlax_v2`), nơi có hộp thư liên hệ (tên biến giữ từ thời vault) |
-| `TWO_FA_MASTER_KEY` | Không còn dùng. Khoá đọc bảng vault cũ `two_factor_entries`, giữ cho tới khi xoá bảng đó |
+| `TWOFA_MASTER_KEY` | Khoá của /2fa, giống hệt env winlax-v2; vault đọc và ghi bằng khoá này |
+| `TWO_FA_MASTER_KEY` | Không còn dùng. Khoá đọc bảng vault cũ `two_factor_entries`, giữ làm bản dự phòng |
 
 ## Đặt lại 2FA (mất điện thoại)
 

@@ -26,6 +26,7 @@ export function AdminNav({ apps }: { apps: readonly string[] }) {
       {item({ href: "/database", label: "Database & SQL" })}
       {item({ href: "/backups", label: "Sao lưu" })}
       {item({ href: "/terminal", label: "Terminal" })}
+      {item({ href: "/vault", label: "Vault 2FA" })}
       {item({ href: "/inbox", label: "Hộp thư liên hệ" })}
       {item({ href: "/audit", label: "Nhật ký thao tác" })}
       {item({ href: "/account", label: "Tài khoản" })}
