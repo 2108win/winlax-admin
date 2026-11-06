@@ -31,7 +31,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import type { ContactMessage } from "@/lib/vault/contact/repository";
+import type { ContactMessage } from "@/lib/site/contact";
 
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
   dateStyle: "medium",
@@ -146,15 +146,15 @@ export function MessagesPanel({
 
   return (
     <section
-      aria-labelledby="vault-messages-title"
+      aria-labelledby="inbox-title"
       className="flex flex-col gap-4"
     >
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold" id="vault-messages-title">
-            Tin nhắn liên hệ từ winlax.id.vn
-          </h2>
-          <p className="text-sm text-base-content/50">Form liên hệ trên web lưu vào đây.</p>
+          <h1 className="text-xl font-semibold" id="inbox-title">
+            Hộp thư liên hệ
+          </h1>
+          <p className="text-sm text-base-content/50">Tin nhắn gửi từ form liên hệ trên winlax.id.vn.</p>
         </div>
         <div className="flex gap-2">
           <Badge variant="outline">{messages.length} tin nhắn</Badge>

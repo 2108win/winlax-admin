@@ -13,7 +13,7 @@ export const DEVICE_COOKIE = "__Host-wa_device";
 
 const SESSION_HOURS = 12;
 const PENDING_MINUTES = 10;
-/** Dangerous actions (terminal, SQL writes, env, vault) need a fresh 2FA code. */
+/** Dangerous actions (terminal, SQL writes, env) need a fresh 2FA code. */
 export const STEP_UP_MINUTES = 10;
 
 /** A remembered device skips 2FA at login; every use keeps it for this long again. */

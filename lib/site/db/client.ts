@@ -1,7 +1,7 @@
 import "server-only";
 
-import { createPostgresExecutor } from "@/lib/vault/db/postgres";
-import { Query, type QueryExecutor } from "@/lib/vault/db/query";
+import { createPostgresExecutor } from "@/lib/site/db/postgres";
+import { Query, type QueryExecutor } from "@/lib/site/db/query";
 
 /** Every query fails fast instead of leaving the UI on a spinner. */
 export const DB_TIMEOUT_MS = 5_000;
@@ -16,7 +16,10 @@ export function readFirstEnvironmentValue(
   return undefined;
 }
 
-/** The winlax_v2 database (the vault tables live there), as its own least-privilege role. */
+/**
+ * The winlax_v2 database of winlax.id.vn (contact messages), as its own least-privilege role.
+ * The variable keeps its old name from when the 2FA vault lived here.
+ */
 export function readDatabaseUrl(): string | null {
   return readFirstEnvironmentValue(["VAULT_DATABASE_URL"]) ?? null;
 }
@@ -39,7 +42,7 @@ export type DbClient = Readonly<{ from: (table: string) => Query }>;
 
 /** Server-only database client. Never import this from a Client Component. */
 export function createDbClient(url: string | null = readDatabaseUrl()): DbClient {
-  if (!url) throw new Error("Database vault chưa được cấu hình (VAULT_DATABASE_URL).");
+  if (!url) throw new Error("Database winlax_v2 chưa được cấu hình (VAULT_DATABASE_URL).");
   const executor = url.startsWith("memory://")
     ? globalForExecutors.__winlaxMemoryExecutors?.get(url)
     : createPostgresExecutor(url, DB_TIMEOUT_MS);

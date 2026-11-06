@@ -1,10 +1,8 @@
 import "server-only";
 
+import { createDbClient, type DbClient } from "@/lib/site/db/client";
 
-import { createDbClient, type DbClient } from "@/lib/vault/db/client";
-
-import type { ContactInput } from "./validate";
-
+/** Messages from the contact form on winlax.id.vn (table contact_messages in winlax_v2). */
 export type ContactMessageStatus = "archived" | "new" | "read";
 
 export type ContactMessage = Readonly<{
@@ -39,21 +37,6 @@ function toMessage(row: ContactRow): ContactMessage {
     name: row.name,
     status: row.status,
   };
-}
-
-export async function insertContactMessage(
-  input: ContactInput,
-  actorHash: string,
-  client: DbClient = createDbClient(),
-): Promise<void> {
-  const { error } = await client.from("contact_messages").insert({
-    actor_hash: actorHash,
-    email: input.email,
-    locale: input.locale,
-    message: input.message,
-    name: input.name,
-  });
-  if (error) throw new Error(`Không thể lưu tin nhắn: ${error.message}`);
 }
 
 export async function listContactMessages(

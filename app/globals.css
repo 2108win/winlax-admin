@@ -43,7 +43,7 @@
 }
 
 /* The shadcn/ui contract, mapped onto the active daisyUI theme so every component (buttons,
-   inputs, tabs, dialogs in the vault) changes with the theme picker. Never define --border
+   inputs, tabs, dialogs) changes with the theme picker. Never define --border
    here: daisyUI uses it for the border width. */
 :root {
   --radius: 0.5rem;

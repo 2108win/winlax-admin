@@ -15,7 +15,7 @@ vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
     cùng lượt Google chuyển về), chỉ lưu hash trong `admin_trusted_devices`; không dựa vào IP vì IP đổi và
     mọi request đi qua Cloudflare. Lần sau, sau Google hoặc mật khẩu là vào thẳng, không hỏi mã. Mỗi lần dùng
     gia hạn thêm 90 ngày. Cookie một mình không đăng nhập được: vẫn phải qua Google hoặc mật khẩu.
-  - Phiên mở trên máy đã nhớ chưa có step-up, nên terminal, SQL ghi, env và vault vẫn hỏi mã 2FA.
+  - Phiên mở trên máy đã nhớ chưa có step-up, nên terminal, SQL ghi và env vẫn hỏi mã 2FA.
   - Trang **Tài khoản** liệt kê các máy đã nhớ, có nút quên từng máy hoặc tất cả (`DELETE /api/account/devices`).
   - Đăng nhập bằng mật khẩu chỉ thay bước Google. Mặc định tắt. Bật, đổi hoặc tắt ở trang **Tài khoản**
     (cần nhập lại mã 2FA).
@@ -25,16 +25,16 @@ vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
 - Chạy bằng `deploy winlax-admin` như các web khác (root, pm2, sau nginx).
 - Deploy/restart/rollback chạy trong unit `systemd-run` riêng nên không bị ngắt khi web này tự khởi động lại.
 
-## Vault 2FA (/vault)
+## Hộp thư liên hệ (/inbox)
 
-Chuyển từ winlax-v2 vào `app/(admin)/vault` và `lib/vault/`. Dữ liệu vẫn nằm trong database
-`winlax_v2`, đọc bằng role `winlax_v2` (`VAULT_DATABASE_URL`) và giải mã bằng `TWO_FA_MASTER_KEY`.
+Tin nhắn từ form liên hệ trên winlax.id.vn (bảng `contact_messages` trong database `winlax_v2`, đọc
+bằng role `winlax_v2` qua `VAULT_DATABASE_URL`). Code: `app/(admin)/inbox` và `lib/site/`. Mỗi server
+action tự kiểm tra phiên đăng nhập, vì action gọi được bằng POST trực tiếp mà không qua layout. Xoá tin
+nhắn được ghi vào Nhật ký thao tác (`contact.delete`).
 
-Vault không có khoá riêng: đăng nhập trang quản trị (Google + 2FA) là mở được. Không còn mật khẩu
-vault, mã mở khoá, tự khoá hay danh sách phiên. Mỗi server action tự kiểm tra phiên đăng nhập quản
-trị, vì action gọi được bằng POST trực tiếp mà không qua layout. Bảng `vault_sessions` và
-`vault_settings` vẫn còn trong `winlax_v2` nhưng không dùng nữa (keep-alive của winlax-v2 vẫn dọn
-`vault_sessions`, nên đừng xoá bảng).
+Vault 2FA đã chuyển hẳn sang trang công khai https://winlax.id.vn/2fa (06/11/2026) và đã gỡ khỏi đây.
+Bảng cũ `two_factor_entries` trong `winlax_v2` và biến `TWO_FA_MASTER_KEY` vẫn giữ làm bản dự phòng,
+code không dùng nữa. Chỉ xoá khi chủ web đồng ý.
 
 ## Biến môi trường (`/var/www/winlax-admin/shared/.env.production.local`)
 
@@ -45,8 +45,8 @@ trị, vì action gọi được bằng POST trực tiếp mà không qua layout
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | OAuth client, redirect URI `https://db.winlax.id.vn/api/auth/google/callback` |
 | `DATABASE_URL` | Postgres `winlax_admin` (role superuser, dùng cho SQL console) |
 | `ADMIN_SECRET_KEY` | 32 byte base64, mã hoá secret 2FA và cookie OAuth |
-| `VAULT_DATABASE_URL` | Database `winlax_v2` (role `winlax_v2`), nơi có bảng vault và hộp thư liên hệ |
-| `TWO_FA_MASTER_KEY`, `SECURITY_HASH_SECRET` | Giống hệt winlax-v2; đổi `TWO_FA_MASTER_KEY` là mất toàn bộ dữ liệu vault |
+| `VAULT_DATABASE_URL` | Database `winlax_v2` (role `winlax_v2`), nơi có hộp thư liên hệ (tên biến giữ từ thời vault) |
+| `TWO_FA_MASTER_KEY` | Không còn dùng. Khoá đọc bảng vault cũ `two_factor_entries`, giữ cho tới khi xoá bảng đó |
 
 ## Đặt lại 2FA (mất điện thoại)
 

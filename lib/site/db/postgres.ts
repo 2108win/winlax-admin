@@ -2,24 +2,24 @@ import "server-only";
 
 import { Pool, types, type CustomTypesConfig } from "pg";
 
-import { DbExecutionError, type QueryExecutor, type QuerySpec } from "@/lib/vault/db/query";
+import { DbExecutionError, type QueryExecutor, type QuerySpec } from "@/lib/site/db/query";
 
-// Return what PostgREST used to: timestamps as ISO strings, bigint (TOTP steps) as numbers.
+// Return what PostgREST used to: timestamps as ISO strings, bigint as numbers.
 // Postgres prints "2026-10-28 10:00:00.123+00"; JavaScript needs "T" and "+00:00".
 const toIso = (value: string) => {
   const date = new Date(value.replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00"));
   return Number.isNaN(date.getTime()) ? value : date.toISOString();
 };
-const VAULT_PARSERS: Record<number, (value: string) => unknown> = {
+const SITE_PARSERS: Record<number, (value: string) => unknown> = {
   1184: toIso, // timestamptz
   1114: (value) => toIso(`${value}Z`), // timestamp
   20: (value) => Number(value), // int8
 };
-// Only for the vault's pool: types.setTypeParser() would change every pg connection in the
+// Only for this pool: types.setTypeParser() would change every pg connection in the
 // process, and the admin's own queries need real Date objects (session step-up checks).
-const vaultTypes = {
+const siteTypes = {
   getTypeParser: (oid: number, format?: "text" | "binary") =>
-    (format !== "binary" && VAULT_PARSERS[oid]) || types.getTypeParser(oid, format),
+    (format !== "binary" && SITE_PARSERS[oid]) || types.getTypeParser(oid, format),
 } as CustomTypesConfig;
 
 const IDENTIFIER = /^[a-z_][a-z0-9_]*$/;
@@ -96,7 +96,7 @@ function getPool(connectionString: string, timeoutMs: number) {
       connectionTimeoutMillis: timeoutMs,
       max: 5,
       query_timeout: timeoutMs,
-      types: vaultTypes,
+      types: siteTypes,
     });
     globalForPool.__winlaxPools.set(connectionString, pool);
   }
