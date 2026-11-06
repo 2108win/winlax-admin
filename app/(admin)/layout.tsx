@@ -31,7 +31,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <aside className="flex min-h-full w-60 flex-col gap-4 border-r border-base-300 bg-base-200 p-4">
           <div className="px-2">
             <p className="font-semibold">VPS winlax</p>
-            <p className="text-xs text-base-content/50">180.93.233.145</p>
+            <p className="text-xs text-base-content/50">167.254.240.250</p>
           </div>
           <AdminNav apps={apps.map((app) => app.name)} />
           <div className="mt-auto space-y-3 px-2">

@@ -28,6 +28,7 @@ export function AdminNav({ apps }: { apps: readonly string[] }) {
       {item({ href: "/terminal", label: "Terminal" })}
       {item({ href: "/vault", label: "Vault 2FA" })}
       {item({ href: "/audit", label: "Nhật ký thao tác" })}
+      {item({ href: "/account", label: "Tài khoản" })}
     </ul>
   );
 }

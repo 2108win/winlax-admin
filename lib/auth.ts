@@ -191,9 +191,31 @@ export async function saveTotpSecret(secret: string): Promise<void> {
   );
 }
 
+/* ---------- Optional login password (replaces the Google step, not 2FA) ---------- */
+
+/** The scrypt hash of the admin password, or null when password login is off. */
+export async function getPasswordHash(): Promise<string | null> {
+  const rows = await query<{ value: string }>(
+    "select value from admin_settings where key = 'password_hash'",
+  );
+  return rows[0]?.value ?? null;
+}
+
+export async function setPasswordHash(hash: string): Promise<void> {
+  await query(
+    `insert into admin_settings (key, value) values ('password_hash', $1)
+     on conflict (key) do update set value = excluded.value, updated_at = now()`,
+    [hash],
+  );
+}
+
+export async function clearPasswordHash(): Promise<void> {
+  await query("delete from admin_settings where key = 'password_hash'");
+}
+
 /**
- * Only wrong 2FA codes count: a Google login with another account must not be
- * able to fill the global bucket and lock the real admin out.
+ * Only wrong 2FA codes and passwords count: a Google login with another account
+ * must not be able to fill the global bucket and lock the real admin out.
  */
 export async function isRateLimited(request: Request): Promise<boolean> {
   const rows = await query<{ by_ip: string; global: string }>(
@@ -201,7 +223,7 @@ export async function isRateLimited(request: Request): Promise<boolean> {
        count(*) filter (where ip = $1 and at > now() - make_interval(mins => $2)) as by_ip,
        count(*) filter (where at > now() - interval '1 hour') as global
      from admin_auth_failures
-     where kind in ('totp', 'stepup')`,
+     where kind in ('totp', 'stepup', 'password')`,
     [clientIp(request), FAILURE_WINDOW_MINUTES],
   );
   return (

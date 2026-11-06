@@ -8,7 +8,13 @@ Sửa biến môi trường, tải/khôi phục bản sao lưu, Database & SQL v
 (hiệu lực 10 phút). Terminal dùng `bin/pty-bridge.py` (module `pty` của Python) thay cho node-pty,
 vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
 
-- Đăng nhập: Google (chỉ `ADMIN_EMAIL`) rồi mã 2FA (TOTP). Thao tác nguy hiểm đòi nhập lại mã 2FA.
+- Đăng nhập: Google (chỉ `ADMIN_EMAIL`) **hoặc** email + mật khẩu, rồi mã 2FA (TOTP). Thao tác nguy hiểm đòi
+  nhập lại mã 2FA.
+  - Đăng nhập bằng mật khẩu chỉ thay bước Google; luôn phải qua 2FA. Mặc định tắt. Bật, đổi hoặc tắt ở trang
+    **Tài khoản** (cần nhập lại mã 2FA).
+  - Mật khẩu ít nhất 8 ký tự, lưu dạng hash scrypt trong `admin_settings` (key `password_hash`).
+  - Chỉ nhận email `ADMIN_EMAIL`. Email hoặc mật khẩu sai được tính chung giới hạn với mã 2FA sai: 5 lần trong
+    15 phút mỗi IP, hoặc 20 lần/giờ tổng.
 - Chạy bằng `deploy winlax-admin` như các web khác (root, pm2, sau nginx).
 - Deploy/restart/rollback chạy trong unit `systemd-run` riêng nên không bị ngắt khi web này tự khởi động lại.
 
