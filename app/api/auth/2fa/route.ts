@@ -7,6 +7,7 @@ import {
   getTotpSecret,
   isRateLimited,
   recordFailure,
+  rememberThisDevice,
   saveTotpSecret,
 } from "@/lib/auth";
 import { clientIp, isSameOrigin, json } from "@/lib/security";
@@ -19,7 +20,10 @@ export async function POST(request: Request) {
     return json({ error: "Sai mã quá nhiều lần. Thử lại sau 15 phút." }, 429);
   }
 
-  const { code } = (await request.json().catch(() => ({}))) as { code?: string };
+  const { code, remember } = (await request.json().catch(() => ({}))) as {
+    code?: string;
+    remember?: unknown;
+  };
   const enrolled = await getTotpSecret();
   const secret = enrolled ?? pending.enrollSecret;
   if (!secret || !code || !(await consumeTotp(secret, code))) {
@@ -34,6 +38,12 @@ export async function POST(request: Request) {
   }
   await finishPendingLogin(pending);
   await createSession(pending.email, request);
-  await audit({ email: pending.email, ip: clientIp(request), action: "login" });
+  if (remember === true) await rememberThisDevice(pending.email, request);
+  await audit({
+    email: pending.email,
+    ip: clientIp(request),
+    action: "login",
+    detail: remember === true ? { rememberedDevice: true } : undefined,
+  });
   return json({ ok: true });
 }

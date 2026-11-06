@@ -24,8 +24,8 @@ export default async function LoginPage({
         <h1 className="text-lg font-semibold">Quản trị VPS winlax</h1>
         <p className="mt-1 text-sm text-base-content/60">
           {passwordLogin
-            ? "Đăng nhập Google hoặc email và mật khẩu, sau đó nhập mã 2FA."
-            : "Đăng nhập Google, sau đó nhập mã 2FA."}
+            ? "Đăng nhập Google hoặc email và mật khẩu. Máy lạ phải nhập thêm mã 2FA; máy đã ghi nhớ thì không."
+            : "Đăng nhập Google. Máy lạ phải nhập thêm mã 2FA; máy đã ghi nhớ thì không."}
         </p>
         {error && ERRORS[error] && (
           <p className="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{ERRORS[error]}</p>

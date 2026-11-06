@@ -32,7 +32,7 @@ export default async function TwoFactorPage() {
             <p className="break-all rounded bg-base-300 px-2 py-1 font-mono text-xs">{enroll.secret}</p>
           </div>
         )}
-        <TotpForm endpoint="/api/auth/2fa" redirectTo="/" />
+        <TotpForm endpoint="/api/auth/2fa" redirectTo="/" offerRemember />
       </div>
     </main>
   );

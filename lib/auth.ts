@@ -2,17 +2,22 @@ import { cookies } from "next/headers";
 
 import { decrypt, encrypt, randomToken, sha256 } from "./crypto";
 import { query } from "./db";
+import { deviceLabel } from "./device-label";
 import { clientIp, isSameOrigin, json } from "./security";
 import { verifyCode } from "./totp";
 
 export const SESSION_COOKIE = "__Host-wa_session";
 export const PENDING_COOKIE = "__Host-wa_pending";
 export const OAUTH_COOKIE = "__Host-wa_oauth";
+export const DEVICE_COOKIE = "__Host-wa_device";
 
 const SESSION_HOURS = 12;
 const PENDING_MINUTES = 10;
 /** Dangerous actions (terminal, SQL writes, env, vault) need a fresh 2FA code. */
 export const STEP_UP_MINUTES = 10;
+
+/** A remembered device skips 2FA at login; every use keeps it for this long again. */
+export const TRUSTED_DEVICE_DAYS = 90;
 
 const FAILURE_WINDOW_MINUTES = 15;
 const MAX_FAILURES_PER_IP = 5;
@@ -82,15 +87,27 @@ export function hasFreshStepUp(session: Session): boolean {
   );
 }
 
+/**
+ * Opens a session. Right after a 2FA code the step-up window starts at once; a login
+ * from a remembered device had no code, so dangerous actions still ask for one first.
+ */
 export async function createSession(
   email: string,
   request: Request,
+  options: { stepUp?: boolean } = {},
 ): Promise<void> {
   const token = randomToken();
   await query(
     `insert into admin_sessions (token_hash, email, expires_at, stepup_at, ip, user_agent)
-     values ($1, $2, now() + make_interval(hours => $3), now(), $4, $5)`,
-    [sha256(token), email, SESSION_HOURS, clientIp(request), request.headers.get("user-agent")],
+     values ($1, $2, now() + make_interval(hours => $3), case when $6 then now() end, $4, $5)`,
+    [
+      sha256(token),
+      email,
+      SESSION_HOURS,
+      clientIp(request),
+      request.headers.get("user-agent"),
+      options.stepUp ?? true,
+    ],
   );
   await query("delete from admin_sessions where expires_at < now()");
   (await cookies()).set(SESSION_COOKIE, token, {
@@ -126,7 +143,118 @@ export async function takeOAuthState(): Promise<{ state: string; verifier: strin
   return plain ? (JSON.parse(plain) as { state: string; verifier: string }) : null;
 }
 
-/* ---------- Pending login (Google done, 2FA not yet) ---------- */
+/* ---------- Remembered devices (skip 2FA at login) ---------- */
+
+/**
+ * A device is remembered by a random token in a long-lived cookie, not by its IP:
+ * home IPs change and every request arrives through Cloudflare. The token alone
+ * signs nobody in; it only replaces the 2FA code after Google or the password.
+ */
+async function rememberedDeviceId(email: string): Promise<string | null> {
+  const jar = await cookies();
+  const token = jar.get(DEVICE_COOKIE)?.value;
+  if (!token) return null;
+  const rows = await query<{ id: string }>(
+    `update admin_trusted_devices
+        set last_used_at = now(), expires_at = now() + make_interval(days => $3)
+      where token_hash = $1 and email = $2 and expires_at > now()
+      returning id`,
+    [sha256(token), email, TRUSTED_DEVICE_DAYS],
+  );
+  if (!rows[0]) return null;
+  jar.set(DEVICE_COOKIE, token, deviceCookieOptions());
+  return rows[0].id;
+}
+
+// Lax, not strict: the cookie must come along on the cross-site redirect back from Google.
+const deviceCookieOptions = () => ({
+  ...secureCookie,
+  sameSite: "lax" as const,
+  maxAge: TRUSTED_DEVICE_DAYS * 86_400,
+});
+
+export async function rememberThisDevice(email: string, request: Request): Promise<void> {
+  const token = randomToken();
+  const userAgent = request.headers.get("user-agent")?.slice(0, 400) ?? null;
+  await query(
+    `insert into admin_trusted_devices (token_hash, email, label, user_agent, ip, expires_at)
+     values ($1, $2, $3, $4, $5, now() + make_interval(days => $6))`,
+    [sha256(token), email, deviceLabel(userAgent), userAgent, clientIp(request), TRUSTED_DEVICE_DAYS],
+  );
+  await query("delete from admin_trusted_devices where expires_at < now()");
+  (await cookies()).set(DEVICE_COOKIE, token, deviceCookieOptions());
+}
+
+/**
+ * After Google or the password: a remembered device signs in at once, any other
+ * device goes on to the 2FA code. Returns where the browser goes next.
+ */
+export async function beginLogin(
+  email: string,
+  request: Request,
+): Promise<{ next: string; deviceId: string | null }> {
+  const deviceId = await rememberedDeviceId(email);
+  if (deviceId) {
+    await createSession(email, request, { stepUp: false });
+    return { deviceId, next: "/" };
+  }
+  await createPendingLogin(email);
+  return { deviceId: null, next: "/login/2fa" };
+}
+
+export type TrustedDevice = {
+  id: string;
+  label: string;
+  ip: string | null;
+  createdAt: Date;
+  lastUsedAt: Date;
+  expiresAt: Date;
+  current: boolean;
+};
+
+export async function listTrustedDevices(email: string): Promise<TrustedDevice[]> {
+  const token = (await cookies()).get(DEVICE_COOKIE)?.value;
+  const rows = await query<{
+    id: string;
+    label: string | null;
+    ip: string | null;
+    created_at: Date;
+    last_used_at: Date;
+    expires_at: Date;
+    current: boolean;
+  }>(
+    `select id, label, ip, created_at, last_used_at, expires_at, token_hash = $2 as current
+       from admin_trusted_devices
+      where email = $1 and expires_at > now()
+      order by last_used_at desc`,
+    [email, token ? sha256(token) : ""],
+  );
+  return rows.map((row) => ({
+    createdAt: row.created_at,
+    current: row.current,
+    expiresAt: row.expires_at,
+    id: row.id,
+    ip: row.ip,
+    label: row.label ?? "Thiết bị không rõ",
+    lastUsedAt: row.last_used_at,
+  }));
+}
+
+/** Forgets one remembered device, or all of them when id is null. Returns how many. */
+export async function forgetTrustedDevices(email: string, id: string | null): Promise<number> {
+  const jar = await cookies();
+  const token = jar.get(DEVICE_COOKIE)?.value;
+  const rows = await query<{ token_hash: string }>(
+    `delete from admin_trusted_devices
+      where email = $1 and ($2::uuid is null or id = $2::uuid)
+      returning token_hash`,
+    [email, id],
+  );
+  if (token && rows.some((row) => row.token_hash === sha256(token))) jar.delete(DEVICE_COOKIE);
+  return rows.length;
+}
+
+/* ---------- Pending login (Google or password done, 2FA not yet) ---------- */
 
 export async function createPendingLogin(email: string): Promise<void> {
   const token = randomToken();
@@ -191,7 +319,7 @@ export async function saveTotpSecret(secret: string): Promise<void> {
   );
 }
 
-/* ---------- Optional login password (replaces the Google step, not 2FA) ---------- */
+/* ---------- Optional login password (replaces the Google step; 2FA unless the device is remembered) ---------- */
 
 /** The scrypt hash of the admin password, or null when password login is off. */
 export async function getPasswordHash(): Promise<string | null> {

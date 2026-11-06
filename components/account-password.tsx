@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useStepUpFetch } from "@/components/step-up";
 
-/** Sets, changes or turns off the email + password login (2FA still follows it). */
+/** Sets, changes or turns off the email + password login (2FA follows it on unremembered devices). */
 export function AccountPassword({
   email,
   setAt,
@@ -57,8 +57,8 @@ export function AccountPassword({
       <h2 className="text-xs uppercase tracking-wide text-base-content/40">Đăng nhập bằng email và mật khẩu</h2>
       <p className="mt-2 text-sm text-base-content/70">
         {enabledAt
-          ? `Đang bật (đặt lúc ${enabledAt}). Sau email và mật khẩu vẫn phải nhập mã 2FA.`
-          : "Đang tắt: chỉ đăng nhập được bằng Google. Đặt mật khẩu để bật; sau email và mật khẩu vẫn phải nhập mã 2FA."}
+          ? `Đang bật (đặt lúc ${enabledAt}). Sau email và mật khẩu, máy lạ vẫn phải nhập mã 2FA.`
+          : "Đang tắt: chỉ đăng nhập được bằng Google. Đặt mật khẩu để bật; sau email và mật khẩu, máy lạ vẫn phải nhập mã 2FA."}
       </p>
       <form onSubmit={save} className="mt-4 space-y-3">
         <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />

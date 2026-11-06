@@ -1,6 +1,6 @@
 import { audit } from "@/lib/audit";
 import {
-  createPendingLogin,
+  beginLogin,
   getPasswordHash,
   isRateLimited,
   recordFailure,
@@ -11,8 +11,8 @@ import { MAX_PASSWORD_LENGTH, verifyPassword } from "@/lib/password";
 import { clientIp, isSameOrigin, json } from "@/lib/security";
 
 /**
- * Email + password instead of Google. It only replaces the first step: on success the
- * browser goes on to /login/2fa exactly like after Google.
+ * Email + password instead of Google. It replaces the Google step: like after Google,
+ * a remembered device signs in at once and any other device goes on to /login/2fa.
  */
 export async function POST(request: Request) {
   if (!isSameOrigin(request)) return json({ error: "Nguồn yêu cầu không hợp lệ." }, 403);
@@ -45,7 +45,12 @@ export async function POST(request: Request) {
     return json({ error: "Email hoặc mật khẩu không đúng." }, 400);
   }
 
-  await createPendingLogin(env.adminEmail);
-  await audit({ email: env.adminEmail, ip, action: "login.password" });
-  return json({ ok: true });
+  const { deviceId, next } = await beginLogin(env.adminEmail, request);
+  await audit({
+    email: env.adminEmail,
+    ip,
+    action: deviceId ? "login" : "login.password",
+    detail: deviceId ? { via: "password", device: deviceId } : undefined,
+  });
+  return json({ ok: true, next });
 }

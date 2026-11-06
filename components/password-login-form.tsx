@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-/** Email + password as the first login step; 2FA still follows on /login/2fa. */
+/** Email + password instead of Google; 2FA follows on /login/2fa unless this device is remembered. */
 export function PasswordLoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,14 +18,14 @@ export function PasswordLoginForm() {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const body = (await response.json().catch(() => ({}))) as { error?: string };
+    const body = (await response.json().catch(() => ({}))) as { error?: string; next?: string };
     if (!response.ok) {
       setBusy(false);
       setPassword("");
       setError(body.error ?? "Không đăng nhập được.");
       return;
     }
-    window.location.assign("/login/2fa");
+    window.location.assign(body.next === "/" ? "/" : "/login/2fa");
   }
 
   return (

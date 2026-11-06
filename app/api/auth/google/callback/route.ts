@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 import { audit } from "@/lib/audit";
-import { createPendingLogin, recordFailure, takeOAuthState } from "@/lib/auth";
+import { beginLogin, recordFailure, takeOAuthState } from "@/lib/auth";
 import { safeEqual } from "@/lib/crypto";
 import { env, publicUrl } from "@/lib/env";
 import { verifiedEmailFromCode } from "@/lib/google";
@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
     return back("/login?error=email");
   }
 
-  await createPendingLogin(email);
-  return back("/login/2fa");
+  const { deviceId, next } = await beginLogin(email, request);
+  if (deviceId) {
+    await audit({ email, ip: clientIp(request), action: "login", detail: { via: "google", device: deviceId } });
+  }
+  return back(next);
 }

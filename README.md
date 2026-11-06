@@ -8,10 +8,17 @@ Sửa biến môi trường, tải/khôi phục bản sao lưu, Database & SQL v
 (hiệu lực 10 phút). Terminal dùng `bin/pty-bridge.py` (module `pty` của Python) thay cho node-pty,
 vì node-pty cần trình biên dịch C++20 mà Ubuntu 20.04 không có.
 
-- Đăng nhập: Google (chỉ `ADMIN_EMAIL`) **hoặc** email + mật khẩu, rồi mã 2FA (TOTP). Thao tác nguy hiểm đòi
-  nhập lại mã 2FA.
-  - Đăng nhập bằng mật khẩu chỉ thay bước Google; luôn phải qua 2FA. Mặc định tắt. Bật, đổi hoặc tắt ở trang
-    **Tài khoản** (cần nhập lại mã 2FA).
+- Đăng nhập: Google (chỉ `ADMIN_EMAIL`) **hoặc** email + mật khẩu, rồi mã 2FA (TOTP) nếu là máy lạ. Thao
+  tác nguy hiểm đòi nhập lại mã 2FA.
+  - **Ghi nhớ máy** (giống Facebook, theo ý người dùng 06/11/2026): khi nhập mã 2FA có ô “Ghi nhớ máy này”
+    (mặc định chọn). Máy được nhớ bằng token ngẫu nhiên trong cookie `__Host-wa_device` (SameSite=Lax để đi
+    cùng lượt Google chuyển về), chỉ lưu hash trong `admin_trusted_devices`; không dựa vào IP vì IP đổi và
+    mọi request đi qua Cloudflare. Lần sau, sau Google hoặc mật khẩu là vào thẳng, không hỏi mã. Mỗi lần dùng
+    gia hạn thêm 90 ngày. Cookie một mình không đăng nhập được: vẫn phải qua Google hoặc mật khẩu.
+  - Phiên mở trên máy đã nhớ chưa có step-up, nên terminal, SQL ghi, env và vault vẫn hỏi mã 2FA.
+  - Trang **Tài khoản** liệt kê các máy đã nhớ, có nút quên từng máy hoặc tất cả (`DELETE /api/account/devices`).
+  - Đăng nhập bằng mật khẩu chỉ thay bước Google. Mặc định tắt. Bật, đổi hoặc tắt ở trang **Tài khoản**
+    (cần nhập lại mã 2FA).
   - Mật khẩu ít nhất 8 ký tự, lưu dạng hash scrypt trong `admin_settings` (key `password_hash`).
   - Chỉ nhận email `ADMIN_EMAIL`. Email hoặc mật khẩu sai được tính chung giới hạn với mã 2FA sai: 5 lần trong
     15 phút mỗi IP, hoặc 20 lần/giờ tổng.

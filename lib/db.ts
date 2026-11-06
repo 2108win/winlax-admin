@@ -31,6 +31,17 @@ create table if not exists admin_pending_logins (
   expires_at timestamptz not null,
   created_at timestamptz not null default now()
 );
+create table if not exists admin_trusted_devices (
+  id uuid primary key default gen_random_uuid(),
+  token_hash text not null unique,
+  email text not null,
+  label text,
+  user_agent text,
+  ip text,
+  created_at timestamptz not null default now(),
+  last_used_at timestamptz not null default now(),
+  expires_at timestamptz not null
+);
 create table if not exists admin_settings (
   key text primary key,
   value text not null,
