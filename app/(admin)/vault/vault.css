@@ -177,10 +177,13 @@
   }
 }
 
+/* Anchored near the top, not centered: switching tabs changes the height, and a centered
+   dialog would move its tabs out from under the pointer. The inner wrapper inherits max-height. */
 .vault-dialog {
+  --vault-dialog-top: min(8vh, 4rem);
   width: min(40rem, calc(100vw - 2rem));
-  max-height: calc(100dvh - 2rem);
-  margin: auto;
+  max-height: calc(100dvh - var(--vault-dialog-top) - 1rem);
+  margin: var(--vault-dialog-top) auto auto;
   overflow: hidden;
   border: 1px solid color-mix(in oklab, var(--color-base-content) 20%, transparent);
   border-radius: 0.75rem;

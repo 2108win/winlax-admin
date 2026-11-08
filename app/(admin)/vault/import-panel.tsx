@@ -13,7 +13,7 @@ import {
   ScanLine,
   X,
 } from "lucide-react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import {
   useActionState,
   useCallback,
@@ -1224,6 +1224,19 @@ function BulkImport() {
   );
 }
 
+/** True when a pointer event hit the dialog's backdrop: it targets the dialog and lies outside its box. */
+function isBackdropEvent(event: ReactMouseEvent<HTMLDialogElement>): boolean {
+  const dialog = event.currentTarget;
+  if (event.target !== dialog) return false;
+  const rect = dialog.getBoundingClientRect();
+  return (
+    event.clientX < rect.left ||
+    event.clientX > rect.right ||
+    event.clientY < rect.top ||
+    event.clientY > rect.bottom
+  );
+}
+
 /** "Thêm tài khoản" button that opens the add/import forms in a modal dialog. */
 export function AddAccountDialog({
   existing,
@@ -1234,6 +1247,10 @@ export function AddAccountDialog({
   const dialogRef = useRef<HTMLDialogElement>(null);
   // The forms only exist while the dialog is open: closing it stops the camera and clears them.
   const [open, setOpen] = useState(false);
+  // Whether the current press began on the backdrop. Tabs switch on mousedown and the dialog
+  // resizes, so a press on a tab can be released outside the dialog; the browser then fires
+  // the click on the dialog itself, which looked like a backdrop click and closed it.
+  const pressOnBackdrop = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -1252,14 +1269,19 @@ export function AddAccountDialog({
         aria-labelledby="vault-add-title"
         className="vault-dialog"
         onClick={(event) => {
-          // A click on the backdrop lands on the dialog element itself.
-          if (event.target === event.currentTarget) setOpen(false);
+          // Close only when both the press and the release were on the backdrop.
+          const startedOnBackdrop = pressOnBackdrop.current;
+          pressOnBackdrop.current = false;
+          if (startedOnBackdrop && isBackdropEvent(event)) setOpen(false);
         }}
         onClose={() => setOpen(false)}
+        onPointerDown={(event) => {
+          pressOnBackdrop.current = isBackdropEvent(event);
+        }}
         ref={dialogRef}
       >
         {open ? (
-          <div className="flex max-h-[calc(100dvh-2rem)] flex-col">
+          <div className="flex max-h-[inherit] flex-col">
             <div className="flex items-start justify-between gap-4 border-b border-base-300 px-5 py-4">
               <div>
                 <h2 className="text-base font-semibold" id="vault-add-title">
